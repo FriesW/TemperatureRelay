@@ -11,6 +11,7 @@
 #include <ESP8266WiFi.h>
 
 #define ulong unsigned long
+#define uint unsigned int
 
 #define ssid ""
 #define pass ""
@@ -47,31 +48,46 @@ void loop()
     
 }
 
+#define timeout 1000 //in us
+//#define 
 boolean get_dht()
 {
+    Serial.print("Reading DHT...");
     //Request data
-    Serial.print("Pulse...");
     pinMode(dht, OUTPUT);
     digitalWrite(dht, LOW);
-    delay(10);
+    delay(1);
     pinMode(dht, INPUT);
-    Serial.println("Done");
     
     //Decode
     ulong last_t = micros();
     ulong c_t = last_t;
     boolean last_s = false;
+    uint timing[5*8*2+10];
+    uint pos = 0;
+    cli();
     while(micros() - c_t < 10000)
     {
         if(last_s != digitalRead(dht))
         {
             c_t = micros();
-            Serial.print(last_s);
-            Serial.print(", ");
-            Serial.println(c_t - last_t);
+            //Serial.print(last_s);
+            //Serial.print(", ");
+            //Serial.println(c_t - last_t);
+            timing[pos] = c_t - last_t;
+            pos++;
             last_s = !last_s;
             last_t = c_t;
         }
+        yield();
     }
+    sei();
+    
+    for(uint i = 0; i < 5*8*2+10; i++)
+    {
+        Serial.println(timing[i]);
+    }
+    
+    Serial.println("Done");
     return true;
 }
