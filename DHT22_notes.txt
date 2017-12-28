@@ -1,0 +1,25 @@
+"Datasheet"
+https://cdn-shop.adafruit.com/datasheets/Digital+humidity+and+temperature+sensor+AM2302.pdf
+
+
+Empirical Measurements
+
+53 us inter bit
+25 us 0 bit
+73 us 1 bit
+
+Preamble
+High for 0 bit
+Low for length of 1 bit
+High for 1 bit
+Low for inter bit
+(message bits)
+
+Message
+5 bytes
+1+2: humidity * 10
+3+4: temperature(c) * 10
+5: Checksum
+
+Checksum
+(b1 + b2 + b3 + b4) & 0xFF
