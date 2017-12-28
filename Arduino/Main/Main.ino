@@ -10,13 +10,22 @@
 
 #include <ESP8266WiFi.h>
 
+#define ulong unsigned long
+
 #define ssid ""
 #define pass ""
+
+#define dht 2
 
 void setup()
 {
     Serial.begin(115200);
+    pinMode(dht, INPUT);
+    
+    Serial.println("'Booting'");
     delay(10000);
+    Serial.println("Done");
+    
     Serial.println();
     Serial.print("Connecting");
     WiFi.begin(ssid, pass);
@@ -28,9 +37,41 @@ void setup()
     Serial.println("Connected.");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
+    
+    get_dht();
+    Serial.println("Done");
 }
 
 void loop()
 {
     
+}
+
+boolean get_dht()
+{
+    //Request data
+    Serial.print("Pulse...");
+    pinMode(dht, OUTPUT);
+    digitalWrite(dht, LOW);
+    delay(10);
+    pinMode(dht, INPUT);
+    Serial.println("Done");
+    
+    //Decode
+    ulong last_t = micros();
+    ulong c_t = last_t;
+    boolean last_s = false;
+    while(micros() - c_t < 10000)
+    {
+        if(last_s != digitalRead(dht))
+        {
+            c_t = micros();
+            Serial.print(last_s);
+            Serial.print(", ");
+            Serial.println(c_t - last_t);
+            last_s = !last_s;
+            last_t = c_t;
+        }
+    }
+    return true;
 }
