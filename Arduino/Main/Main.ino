@@ -49,45 +49,89 @@ void loop()
 }
 
 #define timeout 1000 //in us
-//#define 
+#define threshold 50 //in us
 boolean get_dht()
 {
-    Serial.print("Reading DHT...");
+    Serial.println("Reading DHT");
     //Request data
     pinMode(dht, OUTPUT);
     digitalWrite(dht, LOW);
     delay(1);
-    pinMode(dht, INPUT);
-    
-    //Decode
-    ulong last_t = micros();
-    ulong c_t = last_t;
-    boolean last_s = false;
-    uint timing[5*8*2+10];
-    uint pos = 0;
     cli();
-    while(micros() - c_t < 10000)
+    pinMode(dht, INPUT);
+    delayMicroseconds(35); //Miss first super short pulse
+    
+    //Setup
+    ulong last_t = micros();
+    boolean last_s = false;
+    boolean no_timeout = true;
+    byte data[5];
+    //uint timing[5*8+10]; //Debug
+    uint bit_pos = 0;
+    //Catch first bit
+    while( !digitalRead(dht) && (no_timeout = micros() - last_t < timeout) );
+    if(no_timeout) //Update time only if it didn't timeout
+        last_t = micros();
+    while( digitalRead(dht) && (no_timeout = micros() - last_t < timeout) );
+    if(no_timeout) //Update time only if it didn't timeout
+        last_t = micros();
+    //Decode remaining 40 bits
+    while( (bit_pos < 40) && (no_timeout = micros() - last_t < timeout) )
     {
         if(last_s != digitalRead(dht))
         {
-            c_t = micros();
-            //Serial.print(last_s);
-            //Serial.print(", ");
-            //Serial.println(c_t - last_t);
-            timing[pos] = c_t - last_t;
-            pos++;
-            last_s = !last_s;
+            ulong c_t = micros();
+            //If this pulse was high
+            if(last_s)
+            {
+                byte i = bit_pos / 8;
+                data[i] = data[i] << 1;
+                data[i] += c_t - last_t > threshold;
+                //timing[bit_pos] = c_t - last_t; //Debug
+                bit_pos++;
+            }
             last_t = c_t;
+            last_s = !last_s;
         }
-        yield();
+        //yield();
     }
     sei();
     
-    for(uint i = 0; i < 5*8*2+10; i++)
+    if(!no_timeout)
     {
-        Serial.println(timing[i]);
+        Serial.println("Sensor timed out.");
+        Serial.println("Reading DHT Done");
+        return false;
     }
     
-    Serial.println("Done");
-    return true;
+    /*for(uint i = 0; i < 5*8+10; i++)
+        Serial.println(timing[i]);*/
+    
+    //Debug out
+    char hex_out[2*5+2+1];
+    Serial.print("Bits received: 0x:");
+    sprintf(hex_out, "%02X%02X:%02X%02X:%02X", data[0], data[1], data[2], data[3], data[4]);
+    hex_out[2*5+2] = 0; //Null at end of string
+    Serial.println(hex_out);
+    
+    //Unpack
+    byte check = data[4];
+    byte t2 = data[3];
+    byte t1 = data[2];
+    byte h2 = data[1];
+    byte h1 = data[0];
+    
+    //Assign
+    //TODO
+    
+    //Checksum
+    byte calc_check = t2 + t1 + h2 + h1;
+    Serial.print("Checksum ");
+    if(calc_check == check)
+        Serial.println("good.");
+    else
+        Serial.println("bad.");
+    
+    Serial.println("Reading DHT Done");
+    return calc_check == check;
 }
