@@ -52,7 +52,7 @@ void loop()
 #define retry_delay_base 1 //Seconds
 #define retry_delay_multiplier 3
 #define tcp_timeout 5000 //ms
-#define good_response 0xAB;
+#define good_response 0xAB
 boolean tcp_send(const byte data[], uint length)
 {
     static WiFiClient client;
@@ -61,8 +61,7 @@ boolean tcp_send(const byte data[], uint length)
     //Establish connection if it doesn't exist
     if(client.status() != ESTABLISHED)
     {
-        Serial.println(first ? "Establishing connection..." : "Connection failed. Reconnecting...");
-        first = false;
+        Serial.print(first ? "Establishing connection..." : "Connection failed. Reconnecting...");
         
         uint retries = max_retries;
         boolean connected = false;
@@ -72,7 +71,10 @@ boolean tcp_send(const byte data[], uint length)
         while(retries && !connected)
         {
             if( connected = client.connect(host, port) )
+            {
                 Serial.println("Success.");
+                first = false;
+            }
             else
             {
                 Serial.println("Failure.");
@@ -80,7 +82,7 @@ boolean tcp_send(const byte data[], uint length)
                 Serial.print(retry_delay);
                 Serial.println(" seconds.");
                 delay(retry_delay * 1000);
-                Serial.print("Reconnecting...");
+                Serial.print(first ? "Establishing connection..." : "Reconnecting...");
                 retry_delay *= retry_delay_multiplier;
                 retries--;
             }
@@ -89,6 +91,7 @@ boolean tcp_send(const byte data[], uint length)
         //Failure
         if(!connected)
         {
+            Serial.println("Failure.");
             Serial.println("Retries exhausted. Data not sent.");
             return false;
         }
@@ -135,6 +138,9 @@ boolean tcp_send(const byte data[], uint length)
         Serial.print(hex_out);
     }
     Serial.println();
+    Serial.print("Last bit signals ");
+    Serial.print(last == good_response ? "good" : "bad");
+    Serial.println(" response.");
     
     //return true;
     return last == good_response;
