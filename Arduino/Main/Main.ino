@@ -39,7 +39,11 @@ void setup()
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
     
-    get_dht();
+    uint t;
+    uint h;
+    get_dht(t, h);
+    Serial.print(t);
+    Serial.print(h);
     Serial.println("Done");
 }
 
@@ -50,7 +54,7 @@ void loop()
 
 #define timeout 1000 //in us
 #define threshold 50 //in us
-boolean get_dht()
+boolean get_dht(uint &temperature, uint &humidity)
 {
     Serial.println("Reading DHT");
     //Request data
@@ -104,7 +108,7 @@ boolean get_dht()
         return false;
     }
     
-    /*for(uint i = 0; i < 5*8+10; i++)
+    /*for(uint i = 0; i < 5*8+10; i++) //Debug
         Serial.println(timing[i]);*/
     
     //Debug out
@@ -121,17 +125,36 @@ boolean get_dht()
     byte h2 = data[1];
     byte h1 = data[0];
     
-    //Assign
-    //TODO
-    
     //Checksum
     byte calc_check = t2 + t1 + h2 + h1;
     Serial.print("Checksum ");
     if(calc_check == check)
+    {
         Serial.println("good.");
+    }
     else
+    {
         Serial.println("bad.");
+        Serial.println("Reading DHT Done");
+        return false;
+    }
     
+    //Assign
+    temperature = t1;
+    humidity = h1;
+    temperature = (temperature << 8) + t2;
+    humidity = (humidity << 8) + h2;
+    
+    Serial.print("Relative Humidity - ");
+    Serial.print(humidity / 10);
+    Serial.print(".");
+    Serial.print(humidity % 10);
+    Serial.print("%   Temperature - ");
+    Serial.print(temperature / 10);
+    Serial.print(".");
+    Serial.print(temperature % 10);
+    Serial.println("C");
     Serial.println("Reading DHT Done");
-    return calc_check == check;
+    
+    return true;
 }
