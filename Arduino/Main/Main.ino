@@ -16,6 +16,8 @@
 #define ssid ""
 #define pass ""
 
+#define start_wait 10 //Seconds
+
 #define dht 2
 
 void setup()
@@ -23,28 +25,29 @@ void setup()
     Serial.begin(115200);
     pinMode(dht, INPUT);
     
-    Serial.println("'Booting'");
-    delay(10000);
+    //Delay, so if someone is listening they capture the beginning
+    Serial.println();
+    for(byte i = start_wait; i > 0; i--)
+    {
+        delay(1000);
+        Serial.print("Startup wait ");
+        Serial.print(i);
+        Serial.println("...");
+    }
     Serial.println("Done");
     
-    Serial.println();
-    Serial.print("Connecting");
+    Serial.print("Connecting to ");
+    serial.print(ssid);
+    Serial.print(" -> ");
     WiFi.begin(ssid, pass);
     while(WiFi.status() != WL_CONNECTED)
     {
         Serial.print(".");
         delay(500);
     }
-    Serial.println("Connected.");
-    Serial.print("IP address: ");
+    Serial.println(" -> Connected.");
+    Serial.print("Local IP address: ");
     Serial.println(WiFi.localIP());
-    
-    uint t;
-    uint h;
-    get_dht(t, h);
-    Serial.print(t);
-    Serial.print(h);
-    Serial.println("Done");
 }
 
 void loop()
