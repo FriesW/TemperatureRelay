@@ -16,6 +16,9 @@
 #define ssid ""
 #define pass ""
 
+#define host "192.168.1.99"
+#define port 8867
+
 #define start_wait 10 //Seconds
 
 #define dht 2
@@ -43,6 +46,98 @@ void setup()
 void loop()
 {
     //check_connection();
+}
+
+#define max_retries 3
+#define retry_delay_base 1 //Seconds
+#define retry_delay_multiplier 3
+#define tcp_timeout 5000 //ms
+#define good_response 0xAB;
+boolean tcp_send(const byte data[], uint length)
+{
+    static WiFiClient client;
+    static boolean first = true;
+    
+    //Establish connection if it doesn't exist
+    if(client.status() != ESTABLISHED)
+    {
+        Serial.println(first ? "Establishing connection..." : "Connection failed. Reconnecting...");
+        first = false;
+        
+        uint retries = max_retries;
+        boolean connected = false;
+        uint retry_delay = retry_delay_base;
+        
+        //Retry until exhausted
+        while(retries && !connected)
+        {
+            if( connected = client.connect(host, port) )
+                Serial.println("Success.");
+            else
+            {
+                Serial.println("Failure.");
+                Serial.print("Retry in ");
+                Serial.print(retry_delay);
+                Serial.println(" seconds.");
+                delay(retry_delay * 1000);
+                Serial.print("Reconnecting...");
+                retry_delay *= retry_delay_multiplier;
+                retries--;
+            }
+        }
+        
+        //Failure
+        if(!connected)
+        {
+            Serial.println("Retries exhausted. Data not sent.");
+            return false;
+        }
+    }
+    
+    //Send data
+    Serial.print("Sending bits: 0x");
+    char hex_out[3];
+    hex_out[2] = 0;
+    for(uint i = 0; i < length; i++)
+    {
+        sprintf(hex_out, "%02X", data[i]);
+        Serial.print(hex_out);
+    }
+    Serial.println();
+    if( !client.write(data, length) )
+    {
+        Serial.println("Failure sending data.");
+        client.stop();
+        //return tcp_send(data, length); //Could this recursively run away?
+        return false;
+    }
+    
+    //Wait for response
+    ulong start = millis();
+    boolean timeout = false;
+    while( !client.available() && (timeout = millis() - start > tcp_timeout) );
+    if(timeout)
+    {
+        Serial.println("Response timeout. Data was probably not delivered.");
+        client.stop(); //This 'properly' closes the TCP connection, although I just want it gone since its probably broken...
+        //client = null; //???
+        return false;
+    }
+    //Echo response
+    //char hex_out[3]; //Reuse
+    //hex_out[2] = 0;
+    byte last;
+    Serial.print("Received: 0x");
+    while(client.available())
+    {
+        last = client.read();
+        sprintf(hex_out, "%02X", last);
+        Serial.print(hex_out);
+    }
+    Serial.println();
+    
+    //return true;
+    return last == good_response;
 }
 
 void check_connection()
@@ -82,7 +177,7 @@ void check_connection()
     first = false;
 }
 
-#define timeout 1000 //in us
+#define sig_timeout 1000 //in us
 #define threshold 50 //in us
 boolean get_dht(uint &temperature, uint &humidity) //TODO make sure DHT timeout is honored
 {
@@ -103,14 +198,14 @@ boolean get_dht(uint &temperature, uint &humidity) //TODO make sure DHT timeout 
     //uint timing[5*8+10]; //Debug
     uint bit_pos = 0;
     //Catch first bit
-    while( !digitalRead(dht) && (no_timeout = micros() - last_t < timeout) );
+    while( !digitalRead(dht) && (no_timeout = micros() - last_t < sig_timeout) );
     if(no_timeout) //Update time only if it didn't timeout
         last_t = micros();
-    while( digitalRead(dht) && (no_timeout = micros() - last_t < timeout) );
+    while( digitalRead(dht) && (no_timeout = micros() - last_t < sig_timeout) );
     if(no_timeout) //Update time only if it didn't timeout
         last_t = micros();
     //Decode remaining 40 bits
-    while( (bit_pos < 40) && (no_timeout = micros() - last_t < timeout) )
+    while( (bit_pos < 40) && (no_timeout = micros() - last_t < sig_timeout) )
     {
         if(last_s != digitalRead(dht))
         {

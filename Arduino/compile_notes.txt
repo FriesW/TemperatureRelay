@@ -1,0 +1,21 @@
+Compile Error:
+C:\Users\WILLIA~1\AppData\Local\Temp\build4584218973391190533.tmp\sketch_dec29a.cpp.o: In function `get_dht(unsigned int&, unsigned int&)':
+C:\Program Files (x86)\Arduino/sketch_dec29a.ino:231: undefined reference to `__cxa_guard_acquire'
+C:\Program Files (x86)\Arduino/sketch_dec29a.ino:231: undefined reference to `__cxa_guard_release'
+C:\Program Files (x86)\Arduino/sketch_dec29a.ino:242: undefined reference to `__cxa_guard_acquire'
+C:\Program Files (x86)\Arduino/sketch_dec29a.ino:242: undefined reference to `__cxa_guard_release'
+collect2.exe: error: ld returned 1 exit status
+Error compiling.
+
+It doesn't appear to be unique to the get_dht(...) function. If the function is removed, the error falls to a different one.
+Occurs when the new tcp_send(...) function is included in the code.
+
+Possible Solution
+https://github.com/bblanchon/ArduinoJson/issues/356
+
+Process
+1) Find platform path
+    C:\Users\William Fries\AppData\Roaming\Arduino15\packages\esp8266\hardware\esp8266\1.6.5-947-g39819f0
+2) Make a backup of platform.txt
+3) Find line compiler.cpp.flags
+4) Assure the following are in the list: -fno-threadsafe-statics -std=c++11
