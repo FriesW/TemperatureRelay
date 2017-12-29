@@ -36,28 +36,55 @@ void setup()
     }
     Serial.println("Done");
     
-    Serial.print("Connecting to ");
-    serial.print(ssid);
-    Serial.print(" -> ");
     WiFi.begin(ssid, pass);
-    while(WiFi.status() != WL_CONNECTED)
-    {
-        Serial.print(".");
-        delay(500);
-    }
-    Serial.println(" -> Connected.");
-    Serial.print("Local IP address: ");
-    Serial.println(WiFi.localIP());
+    check_connection();
 }
 
 void loop()
 {
+    //check_connection();
+}
+
+void check_connection()
+{
+    static boolean first = true;
+    if(!first && WiFi.status() == WL_CONNECTED)
+        return;
+    ulong counter = 0;
+    if(!first)
+        Serial.println("WiFi connection lost.");
+    Serial.print(first ? "Connecting to '" : "Reconnecting to '");
+    Serial.print(ssid);
+    Serial.print("' -> ");
+    while(WiFi.status() != WL_CONNECTED)
+    {
+        counter++;
+        if(counter % (2*10) == 0)
+        {
+            Serial.println();
+            Serial.print("Attempting to ");
+            Serial.print(first ? "connect to '" : "reconnect to '");
+            Serial.print(ssid);
+            Serial.print("' for ");
+            Serial.print(counter / 2);
+            Serial.print("seconds -> ");
+        }
+        Serial.print(".");
+        delay(500);
+    }
+    Serial.println(" -> Connected.");
+    Serial.print("Connection took ");
+    Serial.print(counter / 2);
+    Serial.println(" seconds.");
+    Serial.print("Local IP address: ");
+    Serial.println(WiFi.localIP());
     
+    first = false;
 }
 
 #define timeout 1000 //in us
 #define threshold 50 //in us
-boolean get_dht(uint &temperature, uint &humidity)
+boolean get_dht(uint &temperature, uint &humidity) //TODO make sure DHT timeout is honored
 {
     Serial.println("Reading DHT");
     //Request data
