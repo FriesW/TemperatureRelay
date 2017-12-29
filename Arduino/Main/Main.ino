@@ -40,12 +40,12 @@ void setup()
     Serial.println("Done");
     
     WiFi.begin(ssid, pass);
-    check_connection();
+    check_wifi();
 }
 
 void loop()
 {
-    //check_connection();
+    //check_wifi();
 }
 
 #define max_retries 3
@@ -140,7 +140,7 @@ boolean tcp_send(const byte data[], uint length)
     return last == good_response;
 }
 
-void check_connection()
+void check_wifi()
 {
     static boolean first = true;
     if(!first && WiFi.status() == WL_CONNECTED)
