@@ -12,25 +12,29 @@ PORT = 8165
 
 __print_lock = threading.Lock()
 def sp(*args): #Thread safe print
+    m = ''.join([str(e) for e in args])
     with __print_lock:
-        print ' '.join([str(e) for e in args])
+        print m
 
 def handler(client, addr):
-    n = str( threading.current_thread().name ) + " ::" #name
-    sp( n, "Connection initiated from " + str(addr) + "." )
+    n = str( threading.current_thread().name ) + " :: " #name
+    sp( n, "Connection initiated from ", addr, "." )
     try:
         active = True
         while active:
             m = client.recv(1024)
             active = m != ''
             if active:
-                sp( n, "Data recv:", m )
+                sp( n, "Data recv: ", m )
         
     except socket.timeout as e:
         sp( n, "Timeout occurred." )
     except socket.error as e:
-        tb = ''.join( traceback.format_exception() )
-        sp( n, "Unspecified error occurred.\n" + tb )
+        tb = traceback.format_exc()
+        sp( n, "Unspecified networking error occurred.\n", tb )
+    except:
+        tb = traceback.format_exc()
+        sp( n, "Unspecified error occurred.\n", tb )
     finally:
         client.shutdown(socket.SHUT_RDWR)
         client.close()
