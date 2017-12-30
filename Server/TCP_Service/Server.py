@@ -1,54 +1,54 @@
 #Python2.7
-import SocketServer
 import socket
 import threading
-import time
+#import time
 import traceback
+import thread
 
-TIMEOUT = 60*30 #Half an hour
+#TIMEOUT = 60*30 #Half an hour
+TIMEOUT = 10
+HOST = '0.0.0.0'
+PORT = 8165
 
-class ThreadedHandler(SocketServer.BaseRequestHandler):
-    def __init__(self, *args):
-        self.tn = str( threading.current_thread().name ) #thread name
-        #Issues with calling super: https://mail.python.org/pipermail/python-list/2012-May/624418.html
-        #super(ThreadedHandler, self).__init__(*args)
-        SocketServer.BaseRequestHandler.__init__(self, *args)
-        print self.tn + " started."
-    
-    def pp(self, *text):
-        print self.tn + " :: " + " ".join(text)
+__print_lock = threading.Lock()
+def sp(*args): #Thread safe print
+    with __print_lock:
+        print ' '.join([str(e) for e in args])
 
-    def handle(self):
-        self.pp("Connection started.")
-        self.request.settimeout(TIMEOUT)
-        try:
-            while True:
-                m = self.request.recv(2)
-                if( m != ''):
-                    self.pp("Data recv:", m)
-        except socket.timeout as e:
-            self.pp("Timeout occurred.")
-        except socket.error as e:
-            tb = ''.join( traceback.format_exception() )
-            self.pp("Unspecified error occurred.\n" + tb) #'Atomic' print, don't know if it actually is
-        finally:
-            self.pp("Connection closed.")
-            self.request.close()
-            
+def handler(client, addr):
+    n = str( threading.current_thread().name ) + " ::" #name
+    sp( n, "Connection initiated from " + str(addr) + "." )
+    try:
+        active = True
+        while active:
+            m = client.recv(1024)
+            active = m != ''
+            if active:
+                sp( n, "Data recv:", m )
         
-        #i = 0
-        #while(True):
-        #    self.request.sendall(str(i))
-        #    i += 1
-        #    sleep(10)
-
-class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
-    pass
+    except socket.timeout as e:
+        sp( n, "Timeout occurred." )
+    except socket.error as e:
+        tb = ''.join( traceback.format_exception() )
+        sp( n, "Unspecified error occurred.\n" + tb )
+    finally:
+        client.shutdown(socket.SHUT_RDWR)
+        client.close()
+        sp( n, "Connection closed." )
 
 def run():
-    server = ThreadedTCPServer(('0.0.0.0',8165), ThreadedHandler)
+    sp( "Starting server..." )
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    addr = (HOST,PORT)
+    server.bind(addr)
+    server.listen(5)
+    sp( "Running. Listening on " + str(addr) + "." )
     try:
-        server.serve_forever()
-    except:
-        print "Cleaning up server"
-        server.server_close()
+        while True:
+            client, addr = server.accept()
+            client.settimeout(TIMEOUT)
+            thread.start_new_thread(handler, (client, addr))
+    finally:
+        sp( "Cleaning up server." )
+        server.shutdown(socket.SHUT_RDWR)
+        server.close()
