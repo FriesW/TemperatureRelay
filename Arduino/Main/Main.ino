@@ -156,6 +156,7 @@ boolean tcp_send(const byte data[], uint length)
     return last == good_response;
 }
 
+#define settle_time 10000 //ms
 void check_wifi()
 {
     static boolean first = true;
@@ -190,6 +191,10 @@ void check_wifi()
     Serial.print("Local IP address: ");
     Serial.println(WiFi.localIP());
     
+    Serial.print("Letting connection settle...");
+    delay(settle_time); //effectively a yield, let the initial connection furry finish
+    Serial.println("Done");
+    
     first = false;
 }
 
@@ -197,6 +202,7 @@ void check_wifi()
 #define threshold 50 //in us
 boolean get_dht(uint &temperature, uint &humidity) //TODO make sure DHT timeout is honored
 {
+    optimistic_yield(1000);
     Serial.println("Reading DHT");
     //Request data
     pinMode(dht, OUTPUT);
@@ -241,6 +247,8 @@ boolean get_dht(uint &temperature, uint &humidity) //TODO make sure DHT timeout 
         //yield();
     }
     sei();
+    
+    optimistic_yield(1000);
     
     if(!no_timeout)
     {
