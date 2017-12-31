@@ -16,8 +16,8 @@
 #define ssid ""
 #define pass ""
 
-#define host "192.168.1.99"
-#define port 8867
+#define host "192.168.1.115"
+#define port 8165
 
 #define start_wait 10 //Seconds
 
@@ -45,7 +45,17 @@ void setup()
 
 void loop()
 {
-    //check_wifi();
+    check_wifi();
+    uint temp;
+    uint humid;
+    if( get_dht(temp, humid) )
+    {
+        byte d[2];
+        d[0] = temp & 0xFF;
+        d[1] = temp >> 8;
+        tcp_send(d, 2);
+    }
+    delay(5000);
 }
 
 #define max_retries 3

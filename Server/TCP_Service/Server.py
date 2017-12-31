@@ -10,6 +10,9 @@ TIMEOUT = 10
 HOST = '0.0.0.0'
 PORT = 8165
 
+def s_hex(s):
+	return "0x " + ' '.join([hex(ord(a))[2:].zfill(2) for a in s])
+
 __print_lock = threading.Lock()
 def sp(*args): #Thread safe print
     m = ''.join([str(e) for e in args])
@@ -25,7 +28,8 @@ def handler(client, addr):
             m = client.recv(1024)
             active = m != ''
             if active:
-                sp( n, "Data recv: ", m )
+                sp( n, "Data recv: ", s_hex(m) )
+            client.sendall(0xAB)
         
     except socket.timeout as e:
         sp( n, "Timeout occurred." )
