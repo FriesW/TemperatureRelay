@@ -51,8 +51,8 @@ void loop()
     if( get_dht(temp, humid) )
     {
         byte d[2];
-        d[0] = temp & 0xFF;
-        d[1] = temp >> 8;
+        d[1] = temp & 0xFF;
+        d[0] = temp >> 8;
         tcp_send(d, 2);
     }
     delay(5000);

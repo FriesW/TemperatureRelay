@@ -29,7 +29,7 @@ def handler(client, addr):
             active = m != ''
             if active:
                 sp( n, "Data recv: ", s_hex(m) )
-            client.sendall(0xAB)
+            client.sendall('0xAB')
         
     except socket.timeout as e:
         sp( n, "Timeout occurred." )
