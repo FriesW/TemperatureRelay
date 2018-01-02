@@ -64,7 +64,11 @@ boolean tcp_send(const byte data[], uint length)
     //Establish connection if it doesn't exist
     if(client.status() != ESTABLISHED)
     {
-        Serial.print(first ? "Establishing connection..." : "Connection failed. Reconnecting...");
+        Serial.print(first ? "Establishing connection to " : "Connection failed. Reconnecting to ");
+        Serial.print(host);
+        Serial.print(":");
+        Serial.print(port);
+        Serial.print("...");
         
         uint retries = max_retries;
         boolean connected = false;
@@ -119,6 +123,11 @@ boolean tcp_send(const byte data[], uint length)
         }
         //Get response
         byte resp = client.read();
+        Serial.print("Recieved 0x");
+        char hex_out[3];
+        hex_out[2] = 0;
+        sprintf(hex_out, "%02X", resp);
+        Serial.println(hex_out);
         if(resp != good_handshake)
         {
             Serial.println("Bad response.");
@@ -184,6 +193,7 @@ void check_wifi()
     static boolean first = true;
     if(!first && WiFi.status() == WL_CONNECTED)
         return;
+    Serial.println();
     ulong counter = 0;
     if(!first)
         Serial.println("WiFi connection lost.");
