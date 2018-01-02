@@ -7,8 +7,22 @@ import thread
 
 from config import *
 
-def s_hex(s):
+def s_to_hex(s): #string to hex string
 	return "0x " + ' '.join([hex(ord(a))[2:].zfill(2) for a in s])
+def int_to_s(n): #int (hex) to string
+    o = ''
+    while n != 0:
+        o += chr( n & 0xFF )
+        n = n >> 8
+    return o[::-1] #reverse
+def s_to_int(s): #string to int (hex)
+    o = 0
+    for c in s:
+        o = o << 8
+        o += ord(c)
+    return o
+def int_to_hex(n): #int to hex string, not that efficient...
+    return s_to_hex( int_to_s(n) )
 
 __print_lock = threading.Lock()
 def sp(*args): #Thread safe print
@@ -25,8 +39,8 @@ def handler(client, addr):
             m = client.recv(1024)
             active = m != ''
             if active:
-                sp( n, "Data recv: ", s_hex(m) )
-            client.sendall('0xAB')
+                sp( n, "Data recv: ", s_to_hex(m) )
+            client.sendall( int_to_s(GOOD_RESPONSE) )
         
     except socket.timeout as e:
         sp( n, "Timeout occurred." )
