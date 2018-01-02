@@ -231,12 +231,27 @@ void check_wifi()
 }
 
 #define sig_timeout 1000 //in us
+#define sense_timeout 2000 //in ms, via the docsheet
 #define threshold 50 //in us
-boolean get_dht(uint &temperature, uint &humidity) //TODO make sure DHT timeout is honored
+boolean get_dht(uint &temperature, uint &humidity)
 {
-    optimistic_yield(1000);
+    static boolean first = true;
+    static ulong last_invoke = 0;
+    
     Serial.println();
     Serial.println("Reading DHT");
+    
+    //Must have a minimum time between readings
+    if(!first && millis() - last_invoke < sense_timeout)
+    {
+        Serial.println("Need more time between DHT readings!");
+        return false;
+    }
+    first = false;
+    last_invoke = millis();
+    
+    optimistic_yield(1000); //Next operation takes a long time, and could reset wdt without this
+    
     //Request data
     pinMode(dht, OUTPUT);
     digitalWrite(dht, LOW);
