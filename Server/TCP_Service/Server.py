@@ -64,7 +64,10 @@ def handler(client, addr):
         tb = traceback.format_exc()
         sp( n, "Unspecified error occurred.\n", tb )
     finally:
-        client.shutdown(socket.SHUT_RDWR)
+        try:
+            client.shutdown(socket.SHUT_RDWR)
+        except:
+            pass
         client.close()
         sp( n, "Connection closed." )
 
