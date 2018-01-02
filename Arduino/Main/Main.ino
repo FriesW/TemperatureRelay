@@ -10,14 +10,10 @@
 
 #include <ESP8266WiFi.h>
 
+#include "config.h"
+
 #define ulong unsigned long
 #define uint unsigned int
-
-#define ssid ""
-#define pass ""
-
-#define host "192.168.1.115"
-#define port 8165
 
 #define start_wait 10 //Seconds
 
@@ -58,11 +54,6 @@ void loop()
     delay(5000);
 }
 
-#define max_retries 3
-#define retry_delay_base 1 //Seconds
-#define retry_delay_multiplier 3
-#define tcp_timeout 5000 //ms
-#define good_response 0xAB
 boolean tcp_send(const byte data[], uint length)
 {
     static WiFiClient client;

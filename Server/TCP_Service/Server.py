@@ -5,10 +5,7 @@ import threading
 import traceback
 import thread
 
-#TIMEOUT = 60*30 #Half an hour
-TIMEOUT = 10
-HOST = '0.0.0.0'
-PORT = 8165
+from config import *
 
 def s_hex(s):
 	return "0x " + ' '.join([hex(ord(a))[2:].zfill(2) for a in s])
