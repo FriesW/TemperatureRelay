@@ -5,6 +5,8 @@
 //For the remote TCP server gateway
 #define host "192.168.1.99"
 #define port 8165
+const byte start_handshake[] = {0xAB, 0x80, 0xCD, 0x11, 0x47, 0x0C};
+#define good_handshake 0x76
 #define good_response 0xAB
 //Connection behaviour
 #define max_retries 3

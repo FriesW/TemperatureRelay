@@ -1,6 +1,8 @@
 #Server Settings
 HOST = '0.0.0.0'
 PORT = 8165
+START_HANDSHAKE = 0xAB80CD11470C
+GOOD_HANDSHAKE = 0x76
 GOOD_RESPONSE = 0xAB
 
 #Connection behaviour

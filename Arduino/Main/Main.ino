@@ -59,6 +59,8 @@ boolean tcp_send(const byte data[], uint length)
     static WiFiClient client;
     static boolean first = true;
     
+    Serial.println();
+    
     //Establish connection if it doesn't exist
     if(client.status() != ESTABLISHED)
     {
@@ -96,6 +98,35 @@ boolean tcp_send(const byte data[], uint length)
             Serial.println("Retries exhausted. Data not sent.");
             return false;
         }
+        
+        //Handshake
+        Serial.print("Handshake...");
+        if( !client.write(start_handshake, sizeof(start_handshake)) )
+        {
+            Serial.println("Failure sending handshake.");
+            client.stop();
+            return false;
+        }
+        //Wait for response
+        ulong start = millis();
+        boolean timeout = false;
+        while( !client.available() && (timeout = millis() - start > tcp_timeout) ) yield();
+        if(timeout)
+        {
+            Serial.println("Response timed out.");
+            client.stop();
+            return false;
+        }
+        //Get response
+        byte resp = client.read();
+        if(resp != good_handshake)
+        {
+            Serial.println("Bad response.");
+            client.stop();
+            return false;
+        }
+        Serial.println("Good response.");
+        
     }
     
     //Send data
@@ -119,7 +150,7 @@ boolean tcp_send(const byte data[], uint length)
     //Wait for response
     ulong start = millis();
     boolean timeout = false;
-    while( !client.available() && (timeout = millis() - start > tcp_timeout) );
+    while( !client.available() && (timeout = millis() - start > tcp_timeout) ) yield();
     if(timeout)
     {
         Serial.println("Response timeout. Data was probably not delivered.");
@@ -194,6 +225,7 @@ void check_wifi()
 boolean get_dht(uint &temperature, uint &humidity) //TODO make sure DHT timeout is honored
 {
     optimistic_yield(1000);
+    Serial.println();
     Serial.println("Reading DHT");
     //Request data
     pinMode(dht, OUTPUT);

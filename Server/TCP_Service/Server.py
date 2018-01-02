@@ -35,6 +35,19 @@ def handler(client, addr):
     sp( n, "Connection initiated from ", addr, "." )
     try:
         active = True
+        #Handshake
+        m = ''
+        sh = int_to_s(START_HANDSHAKE)
+        while len(m) != len(sh):
+            m += client.recv(1024)
+        if m != sh:
+            active = False
+            sp(n, "Improper handshake.")
+        else:
+            sp(n, "Good handshake.")
+            client.sendall( int_to_s(GOOD_HANDSHAKE) )
+        
+        #Receive data loop
         while active:
             m = client.recv(1024)
             active = m != ''
