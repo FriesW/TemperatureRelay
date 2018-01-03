@@ -17,9 +17,39 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
         die();
     }
     //Check temperature pattern
-    if( !preg_match('/^[0-9]+(.[0-9]*)?$/', $_REQUEST['t1']) )
+    if( !preg_match('/^(-)?[0-9]+$/', $_REQUEST['t1']) )
     {
         http_response_code(400);
+        die();
+    }
+    
+    try
+    {
+        //Connect to db
+        $conn = new PDO("mysql:host=$SQL_HOST;dbname=$SQL_DB_NAME", $SQL_USER, $SQL_PASSWORD);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        //Process temperatures
+        $index = 1;
+        $t = time();
+        while(isset($_REQUEST["t$index"]))
+        {
+            //Unpack
+            $val = (int)$_REQUEST["t$index"];
+            //Push to db
+            $stmt = $conn->prepare("INSERT INTO $SQL_TABLE (time, temperature) VALUES (:time, :temp)");
+            $stmt->bindValue(':time', $t);
+            $stmt->bindValue(':temp', $val);
+            $stmt->execute();
+            //Increment for next
+            $t -= $TIME_STEP;
+            $index++;
+        }
+        
+    }
+    catch(PDOException $e)
+    {
+        http_response_code(500);
         die();
     }
     
@@ -44,7 +74,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 
 <form method="post">
 Password:<input type="text" name="pass"><br>
-Temperature:<input type="text" name="t1"><br>
+Temperature:<input type="text" name="t1"> hundredths of a degree C<br>
 <input type="submit">
 </form>
 

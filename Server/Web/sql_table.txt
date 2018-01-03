@@ -1,0 +1,7 @@
+Example SQL table creation
+
+CREATE TABLE `The_Database`.`Temperature_Table` (
+`time` INT UNSIGNED NOT NULL PRIMARY KEY ,
+`temperature` SMALLINT NOT NULL
+
+) ENGINE = INNODB;
