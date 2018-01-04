@@ -341,7 +341,7 @@ boolean get_dht(int &temperature, int &humidity)
     humidity = h1;
     temperature = (temperature << 8) + t2;
     humidity = (humidity << 8) + h2;
-    if(t1 & 0x80): temperature *= -1 //If MSB is set, then negative
+    if(t1 & 0x80) temperature *= -1; //If MSB is set, then negative
     
     Serial.print("Relative Humidity - ");
     Serial.print(humidity / 10);
