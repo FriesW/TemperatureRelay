@@ -58,10 +58,10 @@ def handler(client, addr):
             for i in range(0, len(m)-1, 2):
                 ub = ord(m[i])
                 lb = ord(m[i+1])
-                n = (ub & 0x7F) + lb
-                if ub >> 7 == 1: n *= -1
-                temps.append(str(n))
-            sp(n, "Temps:", 'deciC '.join(temps) )
+                t = (ub & 0x7F) + lb
+                if ub >> 7 == 1: t *= -1
+                temps.append(str(t))
+            sp(n, "Temps:", 'deciC '.join(temps) + 'deciC' )
             #Submit data for POST
             
             
