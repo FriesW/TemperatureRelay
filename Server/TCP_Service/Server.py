@@ -49,10 +49,23 @@ def handler(client, addr):
         
         #Receive data loop
         while active:
-            m = client.recv(1024)
-            active = m != ''
-            if active:
-                sp( n, "Data recv: ", s_to_hex(m) )
+            m = ''
+            while len(m) < 2:
+                m += client.recv(1024)
+            sp( n, "Data recv: ", s_to_hex(m) )
+            #Unpack data
+            temps = []
+            for i in range(0, len(m)-1, 2):
+                ub = ord(m[i])
+                lb = ord(m[i+1])
+                n = (ub & 0x7F) + lb
+                if ub >> 7 == 1: n *= -1
+                temps.append(str(n))
+            sp(n, "Temps:", 'deciC '.join(temps) )
+            #Submit data for POST
+            
+            
+            #On success of all, send good response
             client.sendall( int_to_s(GOOD_RESPONSE) )
         
     except socket.timeout as e:
