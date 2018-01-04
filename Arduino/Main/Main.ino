@@ -42,8 +42,8 @@ void setup()
 void loop()
 {
     check_wifi();
-    uint temp;
-    uint humid;
+    int temp;
+    int humid;
     if( get_dht(temp, humid) )
     {
         byte d[2];
@@ -233,7 +233,7 @@ void check_wifi()
 #define sig_timeout 1000 //in us
 #define sense_timeout 2000 //in ms, via the docsheet
 #define threshold 50 //in us
-boolean get_dht(uint &temperature, uint &humidity)
+boolean get_dht(int &temperature, int &humidity)
 {
     static boolean first = true;
     static ulong last_invoke = 0;
@@ -337,10 +337,11 @@ boolean get_dht(uint &temperature, uint &humidity)
     }
     
     //Assign
-    temperature = t1;
+    temperature = t1 & 0x7F; //Remove MSB
     humidity = h1;
     temperature = (temperature << 8) + t2;
     humidity = (humidity << 8) + h2;
+    if(t1 & 0x80): temperature *= -1 //If MSB is set, then negative
     
     Serial.print("Relative Humidity - ");
     Serial.print(humidity / 10);
