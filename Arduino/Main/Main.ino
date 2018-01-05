@@ -75,8 +75,8 @@ void loop()
     //Check if time to report
     if(t - last_report > report_interval)
     {
-        //If at end of queue, by 2
-        if(report_queue_pos + 2 == sizeof(report_queue))
+        //If at end of queue
+        if(report_queue_pos == sizeof(report_queue))
         {
             Serial.println("\nWarning: report queue has been overrun! Old samples will be lost.");
             //Shift array
