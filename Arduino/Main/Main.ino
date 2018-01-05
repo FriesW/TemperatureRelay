@@ -68,7 +68,7 @@ void loop()
                 c++;
             }
             if(c > 1)
-                Serial.println("\nWarning: Sample missed! Something is taking too long, or the interval is too small.\n");
+                Serial.println("\nWarning: Sample missed! Something is taking too long, or the interval is too small.");
         }
     }
     
@@ -78,7 +78,7 @@ void loop()
         //If at end of queue, by 2
         if(report_queue_pos + 2 == sizeof(report_queue))
         {
-            Serial.println("\nWarning: report queue has been overrun! Old samples will be lost.\n");
+            Serial.println("\nWarning: report queue has been overrun! Old samples will be lost.");
             //Shift array
             for(uint i = 0; i < sizeof(report_queue) - 2; i++)
                 report_queue[i] = report_queue[i+2];
@@ -97,7 +97,7 @@ void loop()
             c++;
         }
         if(c > 1)
-            Serial.println("\nWarning: Report missed!  Something is taking too long, or the interval is too small.\n");
+            Serial.println("\nWarning: Report missed!  Something is taking too long, or the interval is too small.");
     }
     
     //Check if there is anything to report
