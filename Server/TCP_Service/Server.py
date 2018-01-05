@@ -30,6 +30,11 @@ def sp(*args): #Thread safe print
     with __print_lock:
         print m
 
+
+
+max_threads = threading.Semaphore(MAX_THREADS)
+
+
 def handler(client, addr):
     n = str( threading.current_thread().name ) + " :: " #name
     sp( n, "Connection initiated from ", addr, "." )
@@ -82,21 +87,27 @@ def handler(client, addr):
         except:
             pass
         client.close()
+        max_threads.release()
         sp( n, "Connection closed." )
 
 def run():
-    sp( "Starting server..." )
+    n = "MAIN :: "
+    sp( n, "Starting server..." )
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     addr = (HOST,PORT)
     server.bind(addr)
-    server.listen(5)
-    sp( "Running. Listening on " + str(addr) + "." )
+    server.listen(MAX_TCP_QUEUE)
+    sp( n, "Running. Listening on " + str(addr) + "." )
     try:
         while True:
+            max_threads.acquire() #If max is reached, then wait
             client, addr = server.accept()
+            sp( n, "Dispatching thread. Approximately ", max_threads._Semaphore__value, " threads left.")
             client.settimeout(TIMEOUT)
             thread.start_new_thread(handler, (client, addr))
     finally:
-        sp( "Cleaning up server." )
+        sp( n, "Cleaning up server." )
         server.shutdown(socket.SHUT_RDWR)
         server.close()
+
+run()
