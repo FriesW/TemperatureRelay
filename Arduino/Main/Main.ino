@@ -135,6 +135,8 @@ boolean tcp_send(const byte data[], uint length)
             if( connected = client.connect(host, port) )
             {
                 Serial.println("Success.");
+                //client.flush();
+                //client.setNoDelay(true);
                 first = false;
             }
             else
@@ -169,7 +171,10 @@ boolean tcp_send(const byte data[], uint length)
         //Wait for response
         ulong start = millis();
         boolean timeout = false;
-        while( !client.available() && (timeout = millis() - start > tcp_timeout) ) yield();
+        byte resp = 0x22;
+        int val = -10101;
+        while( 0 == (val = client.read(&resp, 1)) && !(timeout = millis() - start > tcp_timeout) ) yield();
+        Serial.println(val);
         if(timeout)
         {
             Serial.println("Response timed out.");
@@ -177,7 +182,7 @@ boolean tcp_send(const byte data[], uint length)
             return false;
         }
         //Get response
-        byte resp = client.read();
+        //byte resp = client.read();
         Serial.print("Recieved 0x");
         char hex_out[3];
         hex_out[2] = 0;
@@ -214,12 +219,11 @@ boolean tcp_send(const byte data[], uint length)
     //Wait for response
     ulong start = millis();
     boolean timeout = false;
-    while( !client.available() && (timeout = millis() - start > tcp_timeout) ) yield();
+    while( !client.available() && !(timeout = millis() - start > tcp_timeout) ) yield();
     if(timeout)
     {
         Serial.println("Response timeout. Data was probably not delivered.");
-        client.stop(); //This 'properly' closes the TCP connection, although I just want it gone since its probably broken...
-        //client = null; //???
+        client.stop();
         return false;
     }
     //Echo response
