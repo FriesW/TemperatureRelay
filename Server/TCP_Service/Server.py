@@ -45,9 +45,9 @@ max_threads = threading.Semaphore(MAX_THREADS)
 
 def handler(client, addr):
     
-    def get(length):
+    def get(min_length):
         out = ''
-        while len(out) != length:
+        while len(out) < min_length:
             new = client.recv(1024)
             if len(new) == 0:
                 raise RecvClosed()
