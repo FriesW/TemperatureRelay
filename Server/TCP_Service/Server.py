@@ -7,6 +7,14 @@ import thread
 
 from config import *
 
+class BadHandshake(Exception):
+    def __init__(self,*args,**kwargs):
+        Exception.__init__(self,*args,**kwargs)
+        
+class RecvClosed(Exception):
+    def __init__(self,*args,**kwargs):
+        Exception.__init__(self,*args,**kwargs)
+
 def s_to_hex(s): #string to hex string
 	return "0x " + ' '.join([hex(ord(a))[2:].zfill(2) for a in s])
 def int_to_s(n): #int (hex) to string
@@ -36,27 +44,30 @@ max_threads = threading.Semaphore(MAX_THREADS)
 
 
 def handler(client, addr):
+    
+    def get(length):
+        out = ''
+        while len(out) != length:
+            new = client.recv(1024)
+            if len(new) == 0:
+                raise RecvClosed()
+            out += new
+        return out
+        
     n = str( threading.current_thread().name ) + " :: " #name
     sp( n, "Connection initiated from ", addr, "." )
     try:
-        active = True
         #Handshake
-        m = ''
         sh = int_to_s(START_HANDSHAKE)
-        while len(m) != len(sh):
-            m += client.recv(1024)
+        m = get(len(sh))
         if m != sh:
-            active = False
-            sp(n, "Improper handshake.")
-        else:
-            sp(n, "Good handshake.")
-            client.sendall( int_to_s(GOOD_HANDSHAKE) )
+            raise BadHandshake()
+        sp(n, "Good handshake.")
+        client.sendall( int_to_s(GOOD_HANDSHAKE) )
         
         #Receive data loop
-        while active:
-            m = ''
-            while len(m) < 2:
-                m += client.recv(1024)
+        while True:
+            m = get(2)
             sp( n, "Data recv: ", s_to_hex(m) )
             #Unpack data
             temps = []
@@ -75,6 +86,10 @@ def handler(client, addr):
         
     except socket.timeout as e:
         sp( n, "Timeout occurred." )
+    except BadHandshake as e:
+        sp(n, "Improper handshake.")
+    except RecvClosed as e:
+        sp(n, "Remote client closed its output.")
     except socket.error as e:
         tb = traceback.format_exc()
         sp( n, "Unspecified networking error occurred.\n", tb )
