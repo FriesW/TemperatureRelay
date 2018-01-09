@@ -113,51 +113,52 @@ boolean tcp_send(const byte data[], uint length)
 {
     static WiFiClient client;
     static boolean first = true;
-    
-    Serial.println();
+    static ulong last_attempt;
+    static uint connection_attempts = 0; //Reset to 0 on success
     
     //Establish connection if it doesn't exist
     if(client.status() != ESTABLISHED)
     {
-        Serial.print(first ? "Establishing connection to " : "Connection failed. Reconnecting to ");
-        Serial.print(host);
-        Serial.print(":");
-        Serial.print(port);
-        Serial.print("...");
-        
-        uint retries = max_retries;
-        boolean connected = false;
-        uint retry_delay = retry_delay_base;
-        
-        //Retry until exhausted
-        while(retries && !connected)
+        //Reset last_success immediately on failure
+        if(connection_attempts == 0)
+            last_attempt = millis();
+        //Get delay time
+        uint delay_time = connection_attempts * retry_delay_base * retry_delay_multiplier;
+        if(delay_time > retry_delay_max)
+            delay_time = retry_delay_max;
+        //If not enough time has elapsed, then don't try connecting
+        if( millis() - last_attempt < delay_time*1000 ) //Should always eval False when connection_attempts == 0
         {
-            if( connected = client.connect(host, port) )
+            return false; //Need to wait longer until next attempt
+        }
+        else
+        {
+            Serial.println(); //Print block separator
+            Serial.print(first ? "Establishing connection to " : "Connection failed. Reconnecting to ");
+            Serial.print(host);
+            Serial.print(":");
+            Serial.print(port);
+            Serial.print("...");
+            
+            //Attempt connection
+            if(delay_time != retry_delay_max) //Prevent rollover, although unlikely
+                connection_attempts++;
+            last_attempt = millis();
+            if( client.connect(host, port) )
             {
                 Serial.println("Success.");
-                //client.flush();
-                //client.setNoDelay(true);
                 first = false;
+                connection_attempts = 0;
             }
             else
             {
                 Serial.println("Failure.");
-                Serial.print("Retry in ");
-                Serial.print(retry_delay);
-                Serial.println(" seconds.");
-                delay(retry_delay * 1000);
-                Serial.print(first ? "Establishing connection..." : "Reconnecting...");
-                retry_delay *= retry_delay_multiplier;
-                retries--;
+                Serial.print("Try again after ");
+                uint delay_time = connection_attempts * retry_delay_base * retry_delay_multiplier; //New delay time
+                Serial.print(delay_time > retry_delay_max ? retry_delay_max : delay_time);
+                Serial.println(" seconds have passed.");
+                return false;
             }
-        }
-        
-        //Failure
-        if(!connected)
-        {
-            Serial.println("Failure.");
-            Serial.println("Retries exhausted. Data not sent.");
-            return false;
         }
         
         //Handshake
@@ -194,6 +195,8 @@ boolean tcp_send(const byte data[], uint length)
         Serial.println("Good response.");
         
     }
+    else
+        Serial.println(); //Print block separator
     
     //Send data
     Serial.print("Sending bits: 0x");

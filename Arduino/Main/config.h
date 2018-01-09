@@ -11,9 +11,10 @@ const byte start_handshake[] = {0xAB, 0x80, 0xCD, 0x11, 0x47, 0x0C};
 //Connection behaviour
 #define max_retries 3
 #define retry_delay_base 1 //Seconds
-#define retry_delay_multiplier 3
-#define tcp_timeout 5000 //ms
+#define retry_delay_multiplier 2
+#define retry_delay_max 600 //Seconds
+#define tcp_timeout 10*1000 //ms
 
 #define sample_interval 1000*10 //ms
-#define report_interval 1000*60 //ms
+#define report_interval 1000*10 //ms
 #define report_queue_size 250 //Total samples
