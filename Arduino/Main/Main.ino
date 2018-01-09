@@ -20,6 +20,15 @@
 
 #define dht 2
 
+
+
+ulong last_sample;
+ulong last_report;
+byte report_queue[report_queue_size * 2];
+uint report_queue_pos = 0; //Points to first empty spot
+int sample = MAX_INT;
+
+
 void setup()
 {
     Serial.begin(115200);
@@ -38,14 +47,10 @@ void setup()
     
     WiFi.begin(ssid, pass);
     check_wifi();
+    
+    last_sample = millis();
+    last_report = millis();
 }
-
-
-ulong last_sample = millis();
-ulong last_report = millis();
-byte report_queue[report_queue_size * 2];
-uint report_queue_pos = 0; //Points to first empty spot
-int sample = MAX_INT;
 
 void loop()
 {
