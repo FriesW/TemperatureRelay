@@ -171,10 +171,7 @@ boolean tcp_send(const byte data[], uint length)
         //Wait for response
         ulong start = millis();
         boolean timeout = false;
-        byte resp = 0x22;
-        int val = -10101;
-        while( 0 == (val = client.read(&resp, 1)) && !(timeout = millis() - start > tcp_timeout) ) yield();
-        Serial.println(val);
+        while( !client.available() && !(timeout = millis() - start > tcp_timeout) ) yield();
         if(timeout)
         {
             Serial.println("Response timed out.");
@@ -182,7 +179,7 @@ boolean tcp_send(const byte data[], uint length)
             return false;
         }
         //Get response
-        //byte resp = client.read();
+        byte resp = client.read();
         Serial.print("Recieved 0x");
         char hex_out[3];
         hex_out[2] = 0;
