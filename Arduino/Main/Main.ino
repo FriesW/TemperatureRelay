@@ -119,13 +119,21 @@ boolean tcp_send(const byte data[], uint length)
     //Establish connection if it doesn't exist
     if(client.status() != ESTABLISHED)
     {
-        //Reset last_success immediately on failure
+        uint delay_time;
+        //Special case: first failure
         if(connection_attempts == 0)
+        {
             last_attempt = millis();
-        //Get delay time
-        uint delay_time = connection_attempts * retry_delay_base * retry_delay_multiplier;
-        if(delay_time > retry_delay_max)
-            delay_time = retry_delay_max;
+            delay_time = 0;
+        }
+        //After the first failure
+        else
+        {
+            //Get delay time
+            delay_time = retry_delay_base * intpow(retry_delay_multiplier, connection_attempts - 1);
+            if(delay_time > retry_delay_max)
+                delay_time = retry_delay_max;
+        }
         //If not enough time has elapsed, then don't try connecting
         if( millis() - last_attempt < delay_time*1000 ) //Should always eval False when connection_attempts == 0
         {
@@ -154,7 +162,7 @@ boolean tcp_send(const byte data[], uint length)
             {
                 Serial.println("Failure.");
                 Serial.print("Try again after ");
-                uint delay_time = connection_attempts * retry_delay_base * retry_delay_multiplier; //New delay time
+                uint delay_time = retry_delay_base * intpow(retry_delay_multiplier, connection_attempts - 1); //New delay time
                 Serial.print(delay_time > retry_delay_max ? retry_delay_max : delay_time);
                 Serial.println(" seconds have passed.");
                 return false;
@@ -414,4 +422,12 @@ boolean get_dht(int &temperature, int &humidity)
     Serial.println("Reading DHT Done");
     
     return true;
+}
+
+uint intpow(uint x, uint y)
+{
+    uint o = 1;
+    for(uint i = 0; i < y; i++)
+        o *= x;
+    return o;
 }
