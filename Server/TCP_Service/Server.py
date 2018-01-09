@@ -88,7 +88,7 @@ def handler(client, addr):
         #Receive data loop
         while True:
             m = get(2)
-            sp( n, "Data recv: ", s_to_hex(m) )
+            #sp( n, "Data recv: ", s_to_hex(m) )
             #Unpack data
             temps = []
             for i in range(0, len(m)-1, 2):
@@ -97,7 +97,7 @@ def handler(client, addr):
                 t = (ub & 0x7F) + lb
                 if ub >> 7 == 1: t *= -1
                 temps.append(str(t))
-            sp(n, "Temps:", 'deciC '.join(temps) + 'deciC' )
+            sp(n, "Temps recv:", ' '.join(temps) + ' deciC' )
             #Send the data
             if submit(temps):
                 sp(n, "Submission success.")
