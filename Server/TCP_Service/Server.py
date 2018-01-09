@@ -1,9 +1,10 @@
 #Python2.7
 import socket
 import threading
-#import time
 import traceback
 import thread
+import httplib
+import urllib
 
 from config import *
 
@@ -39,9 +40,26 @@ def sp(*args): #Thread safe print
         print m
 
 
+#Submit data for POST
+def submit(temps):
+    header = {'content-type':'application/x-www-form-urlencoded'}
+    payload = 'pass=' + urllib.quote(LOCAL_PASSWORD, '') + '&'
+    for i in range(len(temps)):
+        payload += 't' + str(i) + '=' + urllib.quote( str(temps[i]), '') + '&'
+    status = 0
+    try:
+        conn = httplib.HTTPConnection(URL)
+        conn.request('POST', PATH, payload, header)
+        resp = conn.getresponse()
+        status = resp.status
+        #sp( "POST DEBUG: ", resp.read() ) #DEBUG
+        conn.close()
+    except Exception as e:
+        tb = traceback.format_exc()
+        sp( "Error occurred during POST submission.\n", tb )
+    return status
 
 max_threads = threading.Semaphore(MAX_THREADS)
-
 
 def handler(client, addr):
     
@@ -78,11 +96,15 @@ def handler(client, addr):
                 if ub >> 7 == 1: t *= -1
                 temps.append(str(t))
             sp(n, "Temps:", 'deciC '.join(temps) + 'deciC' )
-            #Submit data for POST
-            
-            
-            #On success of all, send good response
-            client.sendall( int_to_s(GOOD_RESPONSE) )
+            #Send the data
+            status = submit(temps)
+            if status == 200:
+                sp(n, "Submission success")
+                #On success of all, send good response
+                client.sendall( int_to_s(GOOD_RESPONSE) )
+            else:
+                sp(n, "Submission error. HTTP code: ", status)
+                client.sendall( int_to_s(BAD_RESPONSE) )
         
     except socket.timeout as e:
         sp( n, "Timeout occurred." )
