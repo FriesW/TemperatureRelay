@@ -56,8 +56,10 @@ def submit(temps):
         conn.close()
     except Exception as e:
         tb = traceback.format_exc()
-        sp( "Error occurred during POST submission.\n", tb )
-    return status
+        sp( "SUBMIT: Error occurred during POST submission.\n", tb )
+    if status != 200:
+        sp( "SUBMIT: Error with status of ", status, '.')
+    return status == 200
 
 max_threads = threading.Semaphore(MAX_THREADS)
 
@@ -97,13 +99,12 @@ def handler(client, addr):
                 temps.append(str(t))
             sp(n, "Temps:", 'deciC '.join(temps) + 'deciC' )
             #Send the data
-            status = submit(temps)
-            if status == 200:
-                sp(n, "Submission success")
+            if submit(temps):
+                sp(n, "Submission success.")
                 #On success of all, send good response
                 client.sendall( int_to_s(GOOD_RESPONSE) )
             else:
-                sp(n, "Submission error. HTTP code: ", status)
+                sp(n, "Submission error.")
                 client.sendall( int_to_s(BAD_RESPONSE) )
         
     except socket.timeout as e:
