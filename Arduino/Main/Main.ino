@@ -154,10 +154,11 @@ boolean tcp_send(const byte data[], uint length)
                 connection_attempts++;
             last_attempt = millis();
             
+            Serial.println(); //Print block separator
+            
             //Reconnect if status is false due to lost connection
             if(client.status() != ESTABLISHED)
             {
-                Serial.println(); //Print block separator
                 Serial.print(first ? "Establishing connection to " : "Connection failed. Reconnecting to ");
                 Serial.print(host);
                 Serial.print(":");
@@ -168,7 +169,6 @@ boolean tcp_send(const byte data[], uint length)
                 {
                     Serial.println("Success.");
                     first = false;
-                    connection_attempts = 0;
                 }
                 else
                 {
@@ -217,8 +217,6 @@ boolean tcp_send(const byte data[], uint length)
         }
         
     }
-    else
-        Serial.println(); //Print block separator
     
     //Send data
     Serial.print("Sending bits: 0x");
@@ -264,10 +262,18 @@ boolean tcp_send(const byte data[], uint length)
     Serial.print(last == good_response ? "good" : "bad");
     Serial.println(" response.");
     
-    //Update status, return
-    if(last == good_response && status == false)
+    //Update vars, return
+    //Entering/first failure
+    if(last != good_response && connection_attempts == 0)
+    {
+        connection_attempts = 1;
+    }
+    //Exiting failure
+    else if(last == good_response)
         connection_attempts = 0;
+    //Update status
     status = last == good_response;
+    //Debug print
     if(!status)
     {
         Serial.print("Try again after ");
@@ -275,6 +281,7 @@ boolean tcp_send(const byte data[], uint length)
         Serial.print(delay_time > retry_delay_max ? retry_delay_max : delay_time);
         Serial.println(" seconds have passed.");
     }
+    //Return 
     return status;
 }
 
