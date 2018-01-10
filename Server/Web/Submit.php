@@ -29,21 +29,35 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
         $conn = new PDO("mysql:host=$SQL_HOST;dbname=$SQL_DB_NAME", $SQL_USER, $SQL_PASSWORD);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
+        //Get most recent time from table
+        $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` ORDER BY `time` DESC LIMIT 1, 1");
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $newest_time = $row['time'];
+        
         //Process temperatures
         $index = 0;
+        $continue = true;
         $t = time();
-        while(isset($_REQUEST["t$index"]))
+        while(isset($_REQUEST["t$index"]) && $continue)
         {
-            //Unpack
-            $val = (int)$_REQUEST["t$index"];
-            //Push to db
-            $stmt = $conn->prepare("INSERT INTO $SQL_TABLE (time, temperature) VALUES (:time, :temp)");
-            $stmt->bindValue(':time', $t);
-            $stmt->bindValue(':temp', $val);
-            $stmt->execute();
-            //Increment for next
-            $t -= $TIME_STEP;
-            $index++;
+            $val = $_REQUEST["t$index"];
+            //Stop if bad pattern, or if older than most recent value
+            if(  !preg_match('/^(-)?[0-9]+$/', $val) || $t < $newest_time)
+                $continue = false;
+            else
+            {
+                //Unpack
+                $val = (int)$val;
+                //Push to db
+                $stmt = $conn->prepare("INSERT INTO $SQL_TABLE (time, temperature) VALUES (:time, :temp)");
+                $stmt->bindValue(':time', $t);
+                $stmt->bindValue(':temp', $val);
+                $stmt->execute();
+                //Increment for next
+                $t -= $TIME_STEP;
+                $index++;
+            }
         }
         
     }
