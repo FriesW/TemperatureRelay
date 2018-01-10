@@ -44,8 +44,9 @@ def sp(*args): #Thread safe print
 def submit(temps):
     header = {'content-type':'application/x-www-form-urlencoded'}
     payload = 'pass=' + urllib.quote(LOCAL_PASSWORD, '') + '&'
-    for i in range(len(temps)):
-        payload += 't' + str(i) + '=' + urllib.quote( str(temps[i]), '') + '&'
+    tl = len(temps)
+    for i in range(tl):
+        payload += 't' + str(i) + '=' + urllib.quote( str(temps[tl - 1 - i]), '') + '&' #Assemble reversed
     status = 0
     try:
         conn = httplib.HTTPConnection(URL)
