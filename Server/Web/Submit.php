@@ -5,7 +5,7 @@ require('config.php');
 if($_SERVER['REQUEST_METHOD'] === 'POST')
 {
     //Assure that vars are set in post
-    if(!isset($_REQUEST['pass']) || !isset($_REQUEST['t1']))
+    if(!isset($_REQUEST['pass']) || !isset($_REQUEST['t0']))
     {
         http_response_code(400);
         die();
@@ -17,7 +17,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
         die();
     }
     //Check temperature pattern
-    if( !preg_match('/^(-)?[0-9]+$/', $_REQUEST['t1']) )
+    if( !preg_match('/^(-)?[0-9]+$/', $_REQUEST['t0']) )
     {
         http_response_code(400);
         die();
@@ -30,7 +30,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
         //Process temperatures
-        $index = 1;
+        $index = 0;
         $t = time();
         while(isset($_REQUEST["t$index"]))
         {
@@ -74,7 +74,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 
 <form method="post">
 Password:<input type="text" name="pass"><br>
-Temperature:<input type="text" name="t1"> hundredths of a degree C<br>
+Temperature:<input type="text" name="t0"> hundredths of a degree C<br>
 <input type="submit">
 </form>
 
