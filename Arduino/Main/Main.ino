@@ -268,6 +268,13 @@ boolean tcp_send(const byte data[], uint length)
     if(last == good_response && status == false)
         connection_attempts = 0;
     status = last == good_response;
+    if(!status)
+    {
+        Serial.print("Try again after ");
+        uint delay_time = retry_delay_base * intpow(retry_delay_multiplier, connection_attempts - 1);
+        Serial.print(delay_time > retry_delay_max ? retry_delay_max : delay_time);
+        Serial.println(" seconds have passed.");
+    }
     return status;
 }
 
