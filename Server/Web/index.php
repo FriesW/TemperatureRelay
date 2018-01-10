@@ -1,6 +1,22 @@
 <?php
 
+require('config.php');
 
+/*
+//In progress query
+SELECT c.time, c.temperature  FROM
+(
+    SELECT a.time, a.temperature,
+    (
+        SELECT count(*) FROM
+            (SELECT * FROM $SQL_TABLE WHERE time > $tlim ORDER BY time ASC) b
+        WHERE a.time > b.time
+    ) AS row_number
+    FROM
+        (SELECT * FROM $SQL_TABLE WHERE time > $tlim ORDER BY time ASC) a
+) c
+WHERE c.row_number%15 = 0
+*/
 
 ?>
 
