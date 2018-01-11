@@ -42,6 +42,21 @@ ORDER BY c.time DESC
 EOT;
 }
 
+function print_table($step, $time_period)
+{
+    echo '<table><tr><th>Time</th><th>Temperature (F)</th></tr>';
+    global $conn;
+    $stmt = $conn->prepare(prep_stmt($step, time() - $time_period));
+    $stmt->execute();
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+    {
+        $time = ec($row['time']);
+        $temp = tc($row['temperature']);
+        echo "<tr><td>$time</td><td>$temp</td></tr>";
+    }
+    echo '</table>';
+}
+
 try
 {
     //Connect to db
@@ -98,32 +113,13 @@ try
 
 
 <h3>History: Day</h3>
-<table>
-<tr>
-    <th>Time</th><th>Temperature (F)</th>
-</tr>
-<?php
-$stmt = $conn->prepare(prep_stmt(1, time() - 24*60*60));
-$stmt->execute();
-
-while($row = $stmt->fetch(PDO::FETCH_ASSOC))
-{
-    $time = ec($row['time']);
-    $temp = tc($row['temperature']);
-    echo "<tr><td>$time</td><td>$temp</td></tr>";
-}
-
-?>
-
-<tr>
-    <td>1/2/2018 6:39P</td><td>46.5</td>
-</tr>
-</table>
+<?php print_table(1, 24*60*60); //288 samples. If report every 5 minutes, Total samples = 24*60/5, Displayed samples = total samples / 1 ?> 
 
 <h3>History: Week</h3>
+<?php print_table(7, 7*24*60*60); //288 samples. Displayed samples = (7*24*60/5) / 7 ?>
 
 <h3>History: Month</h3>
-
+<?php print_table(31, 31*24*60*60); //288 samples ?>
 
 </body>
 
