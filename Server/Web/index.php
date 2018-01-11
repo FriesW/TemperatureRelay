@@ -5,6 +5,12 @@ error_reporting(E_ALL);
 
 require('config.php');
 
+function tc($val)
+{
+    $v = (string)round( (((int)$val / 10) * 9 / 5 + 32), 1);
+    return str_pad($v, strlen('000.0'), ' ', STR_PAD_LEFT);
+}
+
 /*
 //In progress query
 SELECT c.time, c.temperature  FROM
@@ -20,6 +26,35 @@ SELECT c.time, c.temperature  FROM
 ) c
 WHERE c.row_number%15 = 0
 */
+
+try
+{
+    //Connect to db
+    $conn = new PDO("mysql:host=$SQL_HOST;dbname=$SQL_DB_NAME", $SQL_USER, $SQL_PASSWORD);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    //Get most recent time from table
+    $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` ORDER BY `time` DESC LIMIT 1, 1");
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $newest_time = $row['time'];
+    
+    //Get 12 & 36 hour lows
+    $mins = array();
+    foreach(array(time() - 12*60*60, time() - 36*60*60) as &$t)
+    {
+        $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` WHERE `time` > :t ORDER BY `temperature` DESC LIMIT 1, 1");
+        $stmt->bindValue(':t', $t);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        array_push($mins, tc($row['temperature']));
+    }
+}
+catch(PDOException $e)
+{
+    http_response_code(500);
+    die();
+}
 
 ?>
 
@@ -42,13 +77,13 @@ WHERE c.row_number%15 = 0
     <th>Item</th><th>Value</th>
 </tr>
 <tr>
-    <th>Last sensor check-in:</th><td>3 minutes ago</td>
+    <th>Last sensor check-in:</th><td><?php echo (int)((time() - $newest_time) / 60);?> minutes ago</td>
 </tr>
 <tr>
-    <th>12 hour low:</th><td>45 F</td>
+    <th>12 hour low:</th><td><?php echo array_shift($mins); ?> F</td>
 </tr>
 <tr>
-    <th>36 hour low:</th><td>55 F</td>
+    <th>36 hour low:</th><td><?php echo array_shift($mins); ?> F</td>
 </tr>
 </table>
 
