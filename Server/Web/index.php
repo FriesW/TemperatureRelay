@@ -5,6 +5,13 @@ error_reporting(E_ALL);
 
 require('config.php');
 
+//epoch converter
+function ec($val)
+{
+    return (new DateTime("@$val"))->format('Y-m-d H:i:s');
+}
+
+//temperature converter
 function tc($val)
 {
     $v = (string)round( (((int)$val / 10) * 9 / 5 + 32), 1);
@@ -31,6 +38,7 @@ SELECT c.time, c.temperature  FROM
         (SELECT * FROM $SQL_TABLE WHERE time > $oldest_time ORDER BY time ASC) a
 ) c
 WHERE c.row_number%$step = 0
+ORDER BY c.time DESC
 EOT;
 }
 
@@ -100,7 +108,7 @@ $stmt->execute();
 
 while($row = $stmt->fetch(PDO::FETCH_ASSOC))
 {
-    $time = $row['time'];
+    $time = ec($row['time']);
     $temp = tc($row['temperature']);
     echo "<tr><td>$time</td><td>$temp</td></tr>";
 }
