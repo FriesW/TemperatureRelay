@@ -11,21 +11,28 @@ function tc($val)
     return str_pad($v, strlen('000.0'), ' ', STR_PAD_LEFT);
 }
 
-/*
-//In progress query
+function prep_stmt($step, $oldest_time)
+{
+    global $SQL_TABLE;
+    $step = (int)$step;
+    $oldest_time = (int)$oldest_time;
+    if($step < 2)
+        return "SELECT * FROM `$SQL_TABLE` WHERE time > $oldest_time";
+    return <<<EOT
 SELECT c.time, c.temperature  FROM
 (
     SELECT a.time, a.temperature,
     (
         SELECT count(*) FROM
-            (SELECT * FROM $SQL_TABLE WHERE time > $tlim ORDER BY time ASC) b
+            (SELECT * FROM $SQL_TABLE WHERE time > $oldest_time ORDER BY time ASC) b
         WHERE a.time > b.time
     ) AS row_number
     FROM
-        (SELECT * FROM $SQL_TABLE WHERE time > $tlim ORDER BY time ASC) a
+        (SELECT * FROM $SQL_TABLE WHERE time > $oldest_time ORDER BY time ASC) a
 ) c
-WHERE c.row_number%15 = 0
-*/
+WHERE c.row_number%$step = 0
+EOT;
+}
 
 try
 {
@@ -49,12 +56,6 @@ try
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         array_push($mins, tc($row['temperature']));
     }
-}
-catch(PDOException $e)
-{
-    http_response_code(500);
-    die();
-}
 
 ?>
 
@@ -93,6 +94,19 @@ catch(PDOException $e)
 <tr>
     <th>Time</th><th>Temperature (F)</th>
 </tr>
+<?php
+$stmt = $conn->prepare(prep_stmt(1, time() - 24*60*60));
+$stmt->execute();
+
+while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+{
+    $time = $row['time'];
+    $temp = tc($row['temperature']);
+    echo "<tr><td>$time</td><td>$temp</td></tr>";
+}
+
+?>
+
 <tr>
     <td>1/2/2018 6:39P</td><td>46.5</td>
 </tr>
@@ -106,3 +120,14 @@ catch(PDOException $e)
 </body>
 
 </html>
+
+<?php
+
+}
+catch(PDOException $e)
+{
+    http_response_code(500);
+    die();
+}
+
+?>
