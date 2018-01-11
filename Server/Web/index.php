@@ -24,7 +24,7 @@ function prep_stmt($step, $oldest_time)
     $step = (int)$step;
     $oldest_time = (int)$oldest_time;
     if($step < 2)
-        return "SELECT * FROM `$SQL_TABLE` WHERE time > $oldest_time";
+        return "SELECT * FROM `$SQL_TABLE` WHERE time > $oldest_time ORDER BY time DESC";
     return <<<EOT
 SELECT c.time, c.temperature  FROM
 (
@@ -58,7 +58,7 @@ try
     $mins = array();
     foreach(array(time() - 12*60*60, time() - 36*60*60) as &$t)
     {
-        $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` WHERE `time` > :t ORDER BY `temperature` DESC LIMIT 1, 1");
+        $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` WHERE `time` > :t ORDER BY `temperature` ASC LIMIT 1, 1");
         $stmt->bindValue(':t', $t);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
