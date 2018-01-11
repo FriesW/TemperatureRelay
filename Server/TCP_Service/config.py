@@ -7,8 +7,7 @@ GOOD_RESPONSE = 0xAB
 BAD_RESPONSE = 0xAA
 
 #Connection behaviour
-#TIMEOUT = 60*30 #Half an hour
-TIMEOUT = 10
+TIMEOUT = 60*30 #Seconds, half an hour
 MAX_THREADS = 10
 MAX_TCP_QUEUE = 2
 
