@@ -150,6 +150,26 @@ setTimeout(
 </td>
 </tr>
 <table>
+
+
+<br>
+<h3>CSV Download</h3>
+<?php
+$t1 = time() - 24*60*60;
+$t2 = time() - 7*24*60*60;
+$t3 = time() - 31*24*60*60;
+$t4 = 0;
+echo <<<EOT
+<a href='csv.php?t=$t1' target='_blank'>Day's Data</a><br>
+<a href='csv.php?t=$t2' target='_blank'>Week's Data</a><br>
+<a href='csv.php?t=$t3' target='_blank'>Month's Data</a><br>
+<a href='csv.php?t=$t4' target='_blank'>ALL Data</a>
+EOT;
+;
+?>
+
+<br><br><br>
+<?php echo "Note: all times are in the $TIMEZONE timezone."; ?>
 </body>
 
 </html>
