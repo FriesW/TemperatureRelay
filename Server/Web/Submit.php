@@ -30,7 +30,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
         //Get most recent time from table
-        $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` ORDER BY `time` DESC LIMIT 1, 1");
+        $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` ORDER BY `time` DESC LIMIT 1");
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         $newest_time = $row['time'];

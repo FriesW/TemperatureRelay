@@ -67,7 +67,7 @@ try
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     //Get most recent time from table
-    $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` ORDER BY `time` DESC LIMIT 1, 1");
+    $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` ORDER BY `time` DESC LIMIT 1");
     $stmt->execute();
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     $newest_time = $row['time'];
@@ -76,7 +76,7 @@ try
     $mins = array();
     foreach(array(time() - 12*60*60, time() - 36*60*60) as &$t)
     {
-        $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` WHERE `time` > :t ORDER BY `temperature` ASC LIMIT 1, 1");
+        $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` WHERE `time` > :t ORDER BY `temperature` ASC LIMIT 1");
         $stmt->bindValue(':t', $t);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
