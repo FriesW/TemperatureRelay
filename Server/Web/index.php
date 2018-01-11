@@ -14,7 +14,7 @@ function ec($val)
 //temperature converter
 function tc($val)
 {
-    $v = (string)round( (((int)$val / 10) * 9 / 5 + 32), 1);
+    $v = number_format( (((int)$val / 10) * 9 / 5 + 32), 1);
     return str_pad($v, strlen('000.0'), ' ', STR_PAD_LEFT);
 }
 
