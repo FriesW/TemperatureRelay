@@ -160,10 +160,10 @@ $t2 = time() - 7*24*60*60;
 $t3 = time() - 31*24*60*60;
 $t4 = 0;
 echo <<<EOT
-<a href='csv.php?t=$t1' target='_blank'>Day's Data</a><br>
-<a href='csv.php?t=$t2' target='_blank'>Week's Data</a><br>
-<a href='csv.php?t=$t3' target='_blank'>Month's Data</a><br>
-<a href='csv.php?t=$t4' target='_blank'>ALL Data</a>
+<a href='csv.php?t=$t1'>Day's Data</a><br>
+<a href='csv.php?t=$t2'>Week's Data</a><br>
+<a href='csv.php?t=$t3'>Month's Data</a><br>
+<a href='csv.php?t=$t4'>ALL Data</a>
 EOT;
 ;
 ?>
