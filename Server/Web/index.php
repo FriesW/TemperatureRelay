@@ -8,7 +8,10 @@ require('config.php');
 //epoch converter
 function ec($val)
 {
-    return (new DateTime("@$val"))->format('Y-m-d H:i:s');
+    global $TIMEZONE;
+    $date = new DateTime("@$val");
+    $date->setTimezone(new DateTimeZone($TIMEZONE));
+    return $date->format('Y-m-d H:i:s'); //Y-m-d h:i:s a
 }
 
 //temperature converter
