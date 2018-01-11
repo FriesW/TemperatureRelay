@@ -94,6 +94,21 @@ try
 </head>
 <body>
 
+<a href='.' id='reload'>
+This page was loaded on <?php echo ec(time()); ?>. It's data is probably outdated. Click to reload.
+</a>
+<div id='spacer'></div>
+<script>
+setTimeout(
+    function()
+    {
+        document.getElementById('reload').style.display = 'block';
+        document.getElementById('spacer').style.display = 'block';
+    },
+    30*60*1000 //30 minutes
+);
+</script>
+
 <h1>Town House Temperatures</h1>
 
 <h3>Quick Glance</h3>

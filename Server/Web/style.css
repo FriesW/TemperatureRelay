@@ -7,6 +7,34 @@ h3
 
 
 
+#reload
+{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 1em;
+    background-color: #ff8296;
+    color: #000000;
+    font-weight: bold;
+    text-decoration: none;
+}
+#reload:hover
+{
+    background-color: #ffb7c3;
+}
+
+#spacer
+{
+    display: none;
+    height: 3em;
+}
+
+
+
+
+
 #quick tr:first-child
 {
     background-color: #555555;
