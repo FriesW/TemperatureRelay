@@ -46,7 +46,6 @@ void setup()
     Serial.println("Done");
     
     WiFi.begin(ssid, pass);
-    check_wifi();
     
     last_sample = millis();
     last_report = millis();
@@ -285,46 +284,46 @@ boolean tcp_send(const byte data[], uint length)
     return status;
 }
 
-#define settle_time 10000 //ms
+#define print_space 5000 //ms between printing
 void check_wifi()
 {
     static boolean first = true;
-    if(!first && WiFi.status() == WL_CONNECTED)
+    static boolean last_status = false; //false if not connected, true if connected
+    static long conn_start = millis() / 1000; //in seconds
+    static ulong last_print = millis();
+    
+    boolean this_status = WiFi.status() == WL_CONNECTED;
+    
+    //If not first and ( wifi is connected or not time for print )
+    if( !first &&
+        ((last_status && this_status) || millis() - last_print < print_space) )
         return;
+    
+    //Previously connected, but isn't any-more
+    if(last_status && !this_status)
+        conn_start = millis() / 1000;
+    
     Serial.println();
-    ulong counter = 0;
     if(!first)
-        Serial.println("WiFi connection lost.");
+        Serial.print("WiFi connection lost. ");
     Serial.print(first ? "Connecting to '" : "Reconnecting to '");
     Serial.print(ssid);
-    Serial.print("' -> ");
-    while(WiFi.status() != WL_CONNECTED)
+    Serial.print("'....");
+    
+    //Previously disconnected, but now is
+    if(!last_status && this_status)
     {
-        counter++;
-        if(counter % (2*10) == 0)
-        {
-            Serial.println();
-            Serial.print("Attempting to ");
-            Serial.print(first ? "connect to '" : "reconnect to '");
-            Serial.print(ssid);
-            Serial.print("' for ");
-            Serial.print(counter / 2);
-            Serial.print("seconds -> ");
-        }
-        Serial.print(".");
-        delay(500);
+        Serial.println(" -> Connected.");
+        Serial.print("Connection took ");
+        Serial.print( millis() / 1000 - conn_start ); //Not perfect, prints in multiples of print_space
+        Serial.println(" seconds.");
+        Serial.print("Local IP address: ");
+        Serial.print(WiFi.localIP());
     }
-    Serial.println(" -> Connected.");
-    Serial.print("Connection took ");
-    Serial.print(counter / 2);
-    Serial.println(" seconds.");
-    Serial.print("Local IP address: ");
-    Serial.println(WiFi.localIP());
     
-    Serial.print("Letting connection settle...");
-    delay(settle_time); //effectively a yield, let the initial connection furry finish
-    Serial.println("Done");
-    
+    Serial.println();
+    last_print = millis();
+    last_status = this_status;
     first = false;
 }
 
