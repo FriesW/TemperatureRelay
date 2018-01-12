@@ -164,6 +164,7 @@ boolean tcp_send(const byte data[], uint length)
                 Serial.print(port);
                 Serial.print("...");
                 
+                client.setTimeout(tcp_timeout);
                 if( client.connect(host, port) )
                 {
                     Serial.println("Success.");
