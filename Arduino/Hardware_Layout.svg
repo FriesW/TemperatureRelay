@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="381.55074"
-     inkscape:cy="817.34199"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="258.60629"
+     inkscape:cy="597.22432"
      inkscape:document-units="px"
      inkscape:current-layer="layer2"
      showgrid="false"
@@ -1693,96 +1693,97 @@
            sodipodi:role="line">spst btn</tspan></text>
     </g>
     <g
-       id="g6355">
+       id="g7189"
+       transform="translate(38.571429,-217.14286)">
       <g
-         id="g6340">
+         id="g7174">
         <rect
            style="opacity:0.6;fill:#c87137;fill-opacity:1;stroke:none"
            id="rect6032-8"
            width="168.57147"
            height="130.35716"
-           x="505.17859"
-           y="-373.61218"
+           x="454.01794"
+           y="-602.62097"
            transform="scale(1,-1)"
            ry="0" />
         <circle
            style="opacity:0.6;fill:#00ff00;fill-opacity:1;stroke:none"
            id="path5943-2-3-5-2"
-           cx="525.64032"
-           cy="308.5947"
+           cx="474.47968"
+           cy="494.03201"
            r="16.162441" />
         <circle
            style="opacity:0.6;fill:#00ff00;fill-opacity:1;stroke:none"
            id="path5943-2-3-7-5"
-           cx="567.7832"
-           cy="308.5947"
+           cx="516.62256"
+           cy="494.03201"
            r="16.162441" />
         <circle
            style="opacity:0.6;fill:#00ff00;fill-opacity:1;stroke:none"
            id="path5943-2-3-8-2"
-           cx="609.93707"
-           cy="308.5947"
+           cx="558.77643"
+           cy="494.03201"
            r="16.162441" />
         <text
            xml:space="preserve"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.5px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-           x="515.26434"
-           y="312.00656"
+           x="464.1037"
+           y="497.44388"
            id="text6061-0"
            sodipodi:linespacing="125%"><tspan
              sodipodi:role="line"
              id="tspan6063-1"
-             x="515.26434"
-             y="312.00656">vcc</tspan></text>
+             x="464.1037"
+             y="497.44388">vcc</tspan></text>
         <text
            xml:space="preserve"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.5px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-           x="553.92212"
-           y="313.25473"
+           x="502.76147"
+           y="498.69205"
            id="text6065-3"
            sodipodi:linespacing="125%"><tspan
              sodipodi:role="line"
              id="tspan6067-9"
-             x="553.92212"
-             y="313.25473">data</tspan></text>
+             x="502.76147"
+             y="498.69205">data</tspan></text>
         <text
            xml:space="preserve"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.5px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-           x="602.35345"
-           y="312.00656"
+           x="551.19281"
+           y="497.44388"
            id="text6061-2-0"
            sodipodi:linespacing="125%"><tspan
              sodipodi:role="line"
              id="tspan6063-3-5"
-             x="602.35345"
-             y="312.00656">nc</tspan></text>
+             x="551.19281"
+             y="497.44388">nc</tspan></text>
         <circle
            style="opacity:0.6;fill:#00ff00;fill-opacity:1;stroke:none"
            id="path5943-2-3-8-2-2"
-           cx="651.78571"
-           cy="308.5947"
+           cx="600.62506"
+           cy="494.03201"
            r="16.162441" />
         <text
            xml:space="preserve"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.5px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-           x="640.10663"
-           y="312.04318"
+           x="588.94598"
+           y="497.4805"
            id="text6061-2-0-2"
            sodipodi:linespacing="125%"><tspan
              sodipodi:role="line"
              id="tspan6063-3-5-7"
-             x="640.10663"
-             y="312.04318">gnd</tspan></text>
+             x="588.94598"
+             y="497.4805">gnd</tspan></text>
       </g>
       <text
          sodipodi:linespacing="125%"
          id="text6174"
-         y="243.25502"
-         x="561.80835"
+         y="472.26379"
+         x="510.64771"
          style="font-style:normal;font-weight:normal;font-size:16.25px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          xml:space="preserve"><tspan
-           y="243.25502"
-           x="561.80835"
+           y="472.26379"
+           x="510.64771"
            id="tspan6176"
            sodipodi:role="line">DHT22</tspan></text>
     </g>
