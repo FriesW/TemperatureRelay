@@ -135,17 +135,17 @@ setTimeout(
 <td>
 
 <h3>History: Day</h3>
-<?php print_table(1, 24*60*60); //288 samples. If report every 5 minutes, Total samples = 24*60/5, Displayed samples = total samples / 1 ?> 
+<?php print_table(1, 24*60*60); //144 samples. If report every 10 minutes, Total samples = 24*60/10, Displayed samples = total samples / 1 ?> 
 
 </td><td>
 
 <h3>History: Week</h3>
-<?php print_table(7, 7*24*60*60); //288 samples. Displayed samples = (7*24*60/5) / 7 ?>
+<?php print_table(7, 7*24*60*60); //144 samples. Displayed samples = (7*24*60/10) / 7 ?>
 
 </td><td>
 
 <h3>History: Month</h3>
-<?php print_table(31, 31*24*60*60); //288 samples ?>
+<?php print_table(31, 31*24*60*60); //144 samples ?>
 
 </td>
 </tr>

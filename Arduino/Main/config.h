@@ -16,5 +16,5 @@ const byte start_handshake[] = {0xAB, 0x80, 0xCD, 0x11, 0x47, 0x0C};
 #define tcp_timeout 10*1000 //ms
 
 #define sample_interval 1000*5 //ms
-#define report_interval 1000*5*60 //ms
+#define report_interval 1000*10*60 //ms, 10 minutes
 #define report_queue_size 1000 //Total samples

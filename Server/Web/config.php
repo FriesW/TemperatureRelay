@@ -8,7 +8,7 @@ $SQL_TABLE = 'table_name';
 
 $LOCAL_PASSWORD = 'testpass';
 
-$TIME_STEP = 5*60; //5 minutes
+$TIME_STEP = 10*60; //10 minutes
 
 //Used just for printing results, can be changed at any time
 //See http://php.net/manual/en/timezones.php for valid strings
