@@ -14,7 +14,6 @@
 
 #define ulong unsigned long
 #define uint unsigned int
-#define MAX_INT 32767
 
 #define start_wait 10 //Seconds
 
@@ -26,7 +25,8 @@ ulong last_sample;
 ulong last_report;
 byte report_queue[report_queue_size * 2];
 uint report_queue_pos = 0; //Points to first empty spot
-int sample = MAX_INT;
+long sample_sum = 0;
+long total_samples = 0;
 
 
 void setup()
@@ -63,7 +63,8 @@ void loop()
         int humid;
         if( get_dht(temp, humid) )
         {
-            sample = sample < temp ? sample : temp; //Minimum
+            sample_sum += temp;
+            total_samples ++;
             //Increment timer
             uint c = 0;
             while(t - last_sample > sample_interval)
@@ -89,10 +90,12 @@ void loop()
             report_queue_pos -= 2;
         }
         //Push sample
-        report_queue[report_queue_pos++] = sample >> 8;
-        report_queue[report_queue_pos++] = sample; //& 0xFF <- implicit
+        int avg = sample_sum / total_samples;
+        report_queue[report_queue_pos++] = avg >> 8;
+        report_queue[report_queue_pos++] = avg; //& 0xFF <- implicit
         //Reset sample
-        sample = MAX_INT;
+        sample_sum = 0;
+        total_samples = 0;
         //Increment timer
         uint c = 0;
         while(t - last_report > report_interval)
@@ -217,6 +220,8 @@ boolean tcp_send(const byte data[], uint length)
         }
         
     }
+    else
+        Serial.println();
     
     //Send data
     Serial.print("Sending bits: 0x");
