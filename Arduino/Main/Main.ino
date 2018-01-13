@@ -116,180 +116,6 @@ void loop()
     
 }
 
-boolean tcp_send(const byte data[], uint length)
-{
-    static WiFiClient client;
-    static boolean first = true;
-    static boolean status = false; //true -> full, correct transaction
-    static ulong last_attempt;
-    static uint connection_attempts = 0; //Reset to 0 on success
-    
-    status = status && client.status() == ESTABLISHED;
-    
-    //Establish connection if it doesn't exist
-    if(!status)
-    {
-        uint delay_time;
-        //Special case: first failure
-        if(connection_attempts == 0)
-        {
-            last_attempt = millis();
-            delay_time = 0;
-        }
-        //After the first failure
-        else
-        {
-            //Get delay time
-            delay_time = retry_delay_base * intpow(retry_delay_multiplier, connection_attempts - 1);
-            if(delay_time > retry_delay_max)
-                delay_time = retry_delay_max;
-        }
-        //If not enough time has elapsed, then don't try connecting
-        if( millis() - last_attempt < delay_time*1000 ) //Should always eval False when connection_attempts == 0
-        {
-            return false; //Need to wait longer until next attempt
-        }
-        else
-        {
-            //Delay has been waited, so reset vars and continue
-            if(delay_time != retry_delay_max) //Prevent rollover, although unlikely
-                connection_attempts++;
-            last_attempt = millis();
-            
-            Serial.println(); //Print block separator
-            
-            //Reconnect if status is false due to lost connection
-            if(client.status() != ESTABLISHED)
-            {
-                Serial.print(first ? "Establishing connection to " : "Connection failed. Reconnecting to ");
-                Serial.print(host);
-                Serial.print(":");
-                Serial.print(port);
-                Serial.print("...");
-                
-                client.setTimeout(tcp_timeout);
-                if( client.connect(host, port) )
-                {
-                    Serial.println("Success.");
-                    first = false;
-                }
-                else
-                {
-                    Serial.println("Failure.");
-                    Serial.print("Try again after ");
-                    uint delay_time = retry_delay_base * intpow(retry_delay_multiplier, connection_attempts - 1); //New delay time
-                    Serial.print(delay_time > retry_delay_max ? retry_delay_max : delay_time);
-                    Serial.println(" seconds have passed.");
-                    return false;
-                }
-                
-                //Handshake
-                Serial.print("Handshake...");
-                if( !client.write(start_handshake, sizeof(start_handshake)) )
-                {
-                    Serial.println("Failure sending handshake.");
-                    client.stop();
-                    return false;
-                }
-                //Wait for response
-                ulong start = millis();
-                boolean timeout = false;
-                while( !client.available() && !(timeout = millis() - start > tcp_timeout) ) yield();
-                if(timeout)
-                {
-                    Serial.println("Response timed out.");
-                    client.stop();
-                    return false;
-                }
-                //Get response
-                byte resp = client.read();
-                Serial.print("Recieved 0x");
-                char hex_out[3];
-                hex_out[2] = 0;
-                sprintf(hex_out, "%02X", resp);
-                Serial.println(hex_out);
-                if(resp != good_handshake)
-                {
-                    Serial.println("Bad response.");
-                    client.stop();
-                    return false;
-                }
-                Serial.println("Good response.");
-        
-            }
-        }
-        
-    }
-    else
-        Serial.println();
-    
-    //Send data
-    Serial.print("Sending bits: 0x");
-    char hex_out[3];
-    hex_out[2] = 0;
-    for(uint i = 0; i < length; i++)
-    {
-        sprintf(hex_out, "%02X", data[i]);
-        Serial.print(hex_out);
-    }
-    Serial.println();
-    if( !client.write(data, length) )
-    {
-        Serial.println("Failure sending data.");
-        client.stop();
-        //return tcp_send(data, length); //Could this recursively run away?
-        return false;
-    }
-    
-    //Wait for response
-    ulong start = millis();
-    boolean timeout = false;
-    while( !client.available() && !(timeout = millis() - start > tcp_timeout) ) yield();
-    if(timeout)
-    {
-        Serial.println("Response timeout. Data was probably not delivered.");
-        client.stop();
-        return false;
-    }
-    //Echo response
-    //char hex_out[3]; //Reuse
-    //hex_out[2] = 0;
-    byte last;
-    Serial.print("Received: 0x");
-    while(client.available())
-    {
-        last = client.read();
-        sprintf(hex_out, "%02X", last);
-        Serial.print(hex_out);
-    }
-    Serial.println();
-    Serial.print("Last bit signals ");
-    Serial.print(last == good_response ? "good" : "bad");
-    Serial.println(" response.");
-    
-    //Update vars, return
-    //Entering/first failure
-    if(last != good_response && connection_attempts == 0)
-    {
-        connection_attempts = 1;
-    }
-    //Exiting failure
-    else if(last == good_response)
-        connection_attempts = 0;
-    //Update status
-    status = last == good_response;
-    //Debug print
-    if(!status)
-    {
-        Serial.print("Try again after ");
-        uint delay_time = retry_delay_base * intpow(retry_delay_multiplier, connection_attempts - 1);
-        Serial.print(delay_time > retry_delay_max ? retry_delay_max : delay_time);
-        Serial.println(" seconds have passed.");
-    }
-    //Return 
-    return status;
-}
-
 #define print_space 5000 //ms between printing
 void check_wifi()
 {
@@ -460,10 +286,162 @@ boolean get_dht(int &temperature, int &humidity)
     return true;
 }
 
-uint intpow(uint x, uint y)
+
+
+
+
+
+
+
+WiFiClient _client;
+boolean _first = true;
+boolean _this_status = false; //really last_
+ulong _this_attempt; //really last_
+uint _connection_attempts = 0;
+
+static boolean _wait_for_data()
 {
-    uint o = 1;
-    for(uint i = 0; i < y; i++)
+    ulong start = millis();
+    boolean timeout = false;
+    while( !_client.available() && !(timeout = millis() - start > tcp_timeout)) yield();
+    if(timeout)
+        Serial.print("Timeout occurred waiting for data. ");
+    return timeout;
+}
+
+static ulong _get_delay_time()
+{
+    ulong delay_time = 0;
+    if(_connection_attempts)
+    {
+        delay_time = retry_delay_base * _longpow(retry_delay_multiplier, _connection_attempts - 1);
+            if(delay_time > retry_delay_max)
+                delay_time = retry_delay_max;
+    }
+    return delay_time;
+}
+
+static boolean _failure()
+{
+    //Stop client
+    _client.stop();
+    //Record failure
+    if(_get_delay_time() != retry_delay_max)
+        _connection_attempts++;
+    //Print debug
+    Serial.println("Failure.");
+    Serial.print("Will try again after ");
+    Serial.print(_get_delay_time());
+    Serial.println(" seconds have passed.");
+    _this_attempt = millis();
+    return false;
+}
+
+static byte _print_byte(byte b)
+{
+    char hex_out[3];
+    hex_out[2] = 0;
+    sprintf(hex_out, "%02X", b);
+    Serial.print(hex_out);
+    return b;
+}
+
+static ulong _longpow(ulong x, ulong y)
+{
+    ulong o = 1;
+    for(ulong i = 0; i < y; i++)
         o *= x;
     return o;
+}
+
+boolean tcp_send(const byte data[], uint length)
+{
+    //Shift status
+    boolean last_status = _this_status;
+    ulong last_attempt = _this_attempt;
+    
+    //Check for timeout
+    if(_connection_attempts) //Not necessary, but nice to have
+    {
+        //Get delay time
+        ulong delay_time = _get_delay_time();
+        //Has enough time elapsed?
+        if( millis() - last_attempt < delay_time*1000 )
+            return false;
+    }
+    
+    //Here forward, something WILL print, so print block
+    Serial.println();
+    
+    //Update status
+    _this_status = _client.status() == ESTABLISHED;
+    _this_attempt = millis();
+    
+    //If not connected...
+    if(!_this_status)
+    {
+        
+        //Attempt connection
+        Serial.print(_first ? "Establishing connection to " : "Connection failed. Reconnecting to ");
+        Serial.print(host);
+        Serial.print(":");
+        Serial.print(port);
+        Serial.print("...");
+        _client.setTimeout(tcp_timeout);
+        if( !_client.connect(host, port) )
+            return _failure();
+        else
+        {
+            Serial.println("Success.");
+            _first = false;
+        }
+        
+        //Handshake
+        Serial.print("Handshake...");
+        if( !_client.write(start_handshake, sizeof(start_handshake)) )
+            return _failure();
+        if(_wait_for_data())
+            return _failure();
+        //Get response
+        Serial.print("Received 0x");
+        byte resp = _print_byte(_client.read());
+        Serial.print(" -> ");
+        if(resp != good_handshake)
+            return _failure();
+        Serial.println("Success.");
+        
+    }
+    
+    //Display data
+    Serial.print("Sending bits: 0x");
+    for(uint i = 0; i < length; i++)
+        _print_byte(data[i]);
+    Serial.print(" ");
+    
+    //Send data
+    if( !_client.write(data, length) )
+        return _failure();
+    Serial.println();
+    
+    //Wait for response
+    if(_wait_for_data())
+        return _failure();
+    
+    //Echo response
+    byte last;
+    Serial.print("Received: 0x");
+    while(_client.available())
+        last = _print_byte(_client.read());
+    
+    //Check response
+    Serial.print(" -> Last bit signals ");
+    Serial.print( last == good_response ? "good" : "bad");
+    Serial.print(" response. ");
+    if(last != good_response)
+        return _failure();
+    Serial.println();
+    
+    //Total success! Reset...
+    _connection_attempts = 0;
+    return true;
 }
