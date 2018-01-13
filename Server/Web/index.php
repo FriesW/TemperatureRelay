@@ -149,7 +149,7 @@ setTimeout(
 
 </td>
 </tr>
-<table>
+</table>
 
 
 <br>
