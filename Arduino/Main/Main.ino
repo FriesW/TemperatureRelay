@@ -128,7 +128,8 @@ void check_wifi()
     
     //If not first and ( wifi is connected or not time for print )
     if( !first &&
-        ((last_status && this_status) || millis() - last_print < print_space) )
+        ((last_status && this_status) || millis() - last_print < print_space) 
+        || last_status == this_status )
         return;
     
     //Previously connected, but isn't any-more
@@ -147,7 +148,7 @@ void check_wifi()
     {
         Serial.println(" -> Connected.");
         Serial.print("Connection took ");
-        Serial.print( millis() / 1000 - conn_start ); //Not perfect, prints in multiples of print_space
+        Serial.print( millis() / 1000 - conn_start );
         Serial.println(" seconds.");
         Serial.print("Local IP address: ");
         Serial.print(WiFi.localIP());
