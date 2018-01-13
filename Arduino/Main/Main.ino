@@ -65,16 +65,16 @@ void loop()
         {
             sample_sum += temp;
             total_samples ++;
-            //Increment timer
-            uint c = 0;
-            while(t - last_sample > sample_interval)
-            {
-                last_sample += sample_interval;
-                c++;
-            }
-            if(c > 1)
-                Serial.println("\nWarning: Sample missed! Something is taking too long, or the interval is too small.");
         }
+        //Increment timer
+        uint c = 0;
+        while(t - last_sample > sample_interval)
+        {
+            last_sample += sample_interval;
+            c++;
+        }
+        if(c > 1)
+            Serial.println("\nWarning: Sample missed! Something is taking too long, or the interval is too small.");
     }
     
     //Check if time to report
