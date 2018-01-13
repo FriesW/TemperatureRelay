@@ -70,7 +70,8 @@ try
     $stmt = $conn->prepare("SELECT * FROM `$SQL_TABLE` ORDER BY `time` DESC LIMIT 1");
     $stmt->execute();
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    $newest_time = $row['time'];
+    $recent_age = time() - $row['time'];
+    $recent_temp = tc($row['temperature']);
     
     //Get 12 & 36 hour lows
     $mins = array();
@@ -120,7 +121,10 @@ setTimeout(
     <th>Item</th><th>Value</th>
 </tr>
 <tr>
-    <th>Last sensor check-in:</th><td><?php echo (int)((time() - $newest_time) / 60);?> minutes ago</td>
+    <th>Last sensor check-in:</th><td><span class=<?php echo $recent_age > $TIME_STEP + 60 ? '"red">':'"">'; echo (int)($recent_age / 60);?> minutes ago</span></td>
+</tr>
+<tr>
+    <th>Most recent temp:</th><td><?php echo $recent_temp; ?> F</td>
 </tr>
 <tr>
     <th>12 hour low:</th><td><?php echo array_shift($mins); ?> F</td>
