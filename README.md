@@ -2,6 +2,10 @@
 
 Collect and report the temperatures of a remote location.
 
+A mishmash of C, Python, PHP, SQL, HTML, CSS, and Javascript which somehow works together.
+
+Results are viewable via a dynamically generated webpage.
+
 ## General overview
 
 Remote hardware consists of an ESP8266 with a DHT temperature sensor, and an internet connection.
@@ -25,7 +29,7 @@ With a temperature check-in every 10 minutes, I estimate that the ESP will use a
 
 ## Design choices
 
-Throughout this project there are a variety of odd design choices. These primarly are due to the systems which I currently have access to. 
+Throughout this project there are a variety of odd design choices. These primarily are due to the systems which I currently have access to. 
 
 For such a simple system, a full LAMP stack seems a little overkill. However, the LAMP setup was already available and configured through services provided by my University.
 
