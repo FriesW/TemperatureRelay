@@ -12,7 +12,7 @@ Remote hardware consists of an ESP8266 with a DHT temperature sensor, and an int
 
 The server side consists of a Python TCP gateway and a LAMP server.
 
-The ESP8266 reads the DHT at regular intervals, sends its data to the Python gateway, which then updates the SQL database. The LAMP server is used to interface with the SQL database, and to serve a webpage displaying the collected data.
+The ESP8266 reads the DHT at regular intervals, sends its data to the Python gateway, which then updates the SQL database. The Apache/PHP server is used to interface with the SQL database, and to serve a webpage displaying the collected data.
 
 ## Features
 
@@ -29,7 +29,7 @@ With a temperature check-in every 10 minutes, I estimate that the ESP will use a
 
 ## Design choices
 
-Throughout this project there are a variety of odd design choices. These primarily are due to the systems which I currently have access to. 
+Throughout this project there are a variety of odd design choices. These are primarily due to the systems which I currently have access to. 
 
 For such a simple system, a full LAMP stack seems a little overkill. However, the LAMP setup was already available and configured through services provided by my University.
 
