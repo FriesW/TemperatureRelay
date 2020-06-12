@@ -1,5 +1,7 @@
 # TemperatureRelay
 
+**See the new and improved version [here](https://github.com/FriesW/TemperatureRelay2.0).**
+
 Collect and report the temperatures of a remote location.
 
 A mishmash of C, Python, PHP, SQL, HTML, CSS, and Javascript which somehow works together.
